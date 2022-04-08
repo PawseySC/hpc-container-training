@@ -1,0 +1,22 @@
+{% comment %}
+  Footer for lesson pages.
+{% endcomment %}
+<footer>
+  <div class="row">
+    <div class="col-md-6" align="left">
+      <h4>
+      Copyright &copy; 2016–{{ 'now' | date: "%Y" }}
+      <a href="http://pawsey.org.au">Pawsey Supercomputing Centre</a>
+      </h4>
+    </div>
+    <div class="col-md-6" align="right">
+      <h4>
+    Adapted from <a href="http://software-carpentry.org">Software Carpentry</a>
+    /
+	<a href="{{ site.github.repository_url }}/">Github Source</a>
+	/
+	<a href="mailto:{{ site.email }}">Contact</a>
+      </h4>
+    </div>
+  </div>
+</footer>
