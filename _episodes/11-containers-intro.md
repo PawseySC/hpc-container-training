@@ -77,6 +77,10 @@ A number of tools are available to create, deploy and run containerised applicat
 
 * **Singularity**: a simple, powerful container engine for the HPC world.  The main focus of this workshop.
 
+Other container engines are 
+
+* **Apptainer**: an opensource offshoot of **Singularity**. 
+
 * **Shifter/Sarus**: a Docker-compatible container engine, suitable for HPC.  Can run containers, cannot build them.
 
 * **Charliecloud**: a Docker-compatible tool for lightweight, user-defined software stacks for high-performance computing.
