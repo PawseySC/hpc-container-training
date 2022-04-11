@@ -158,24 +158,6 @@ We could have used one `RUN` instruction per command, so why concatenating inste
 Well, each `RUN` creates a distinct **layer** in the final image, increasing its size.  It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
 
 
-> ## Syntax of recipe files: Singularity *vs* Docker
->
-> | Task            | Singularity          | Docker              |
-> | :-------------- | :------------------: | :-----------------: |
-> |                 | *Section*            | *Directive*         |
-> | :-------------- | :------------------: | :-----------------: |
-> | Starting image  | `Bootstrap` + `From` | `FROM`              |
-> | Linux commands  | `%post`              | `RUN`               |
-> | Shell variables | `%environment`       | `ENV`               |
-> | Copying files   | `%files`             | `COPY`, `ADD`       |
-> | Metadata        | `%labels`, `%help`   | `LABEL`             |
-> | Default command | `%runscript`         | `CMD, ENTRYPOINT`   |
-> | Long running    | `%startscript`       | Not required        |
-> | Work directory  | Not required         | `WORKDIR`           |
-> | Mount points    | Not required         | `VOLUME`            |
-{: .callout}
-
-
 ### List local Docker images
 
 We know that Docker container images are not single files, but rather adopt a multi-layered format.  To keep things tidy, Docker stores images and their layers in a hidden directory, under its own control.  
@@ -254,70 +236,6 @@ cc967c529ced: Mounted from library/ubuntu
 {: .output}
 
 Your image is now publicly available for anyone to pull.
-
-### Managing containers and images
-
-By default, when containers exit, they remain cached in the system for potential future restart.  Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
-
-```
-$ sudo docker ps -a
-```
-{: .bash}
-
-```
-CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS                       PORTS               NAMES
-375a021f8674        ubuntu:18.04        "bash"                  52 seconds ago      Exited (0) 4 seconds ago                         reverent_volhard
-6000f459c132        ubuntu:18.04        "cat /etc/os-release"   57 seconds ago      Exited (0) 55 seconds ago                        hungry_bhabha
-
-```
-{: .output}
-
-It's possible to clean up cached, exited containers by means of `docker rm`; there's also an idiomatic way to clean all of them at once:
-
-```
-$ sudo docker rm $(sudo docker ps -qa)
-```
-{: .bash}
-
-```
-375a021f8674
-6000f459c132
-```
-{: .output}
-
-If I know in advance I won't need to re-run a container after it exits, I can use the runtime flag `--rm`, as in `docker run --rm`, to clean it up automatically, as we did in the example above.
-
-
-Docker stores container images in a hidden directory under its own control.  To get the list of downloaded images use `docker images`:
-
-```
-$ sudo docker images
-```
-{: .bash}
-
-```
-REPOSITORY                        TAG                      IMAGE ID            CREATED             SIZE
-ubuntu                            18.04                    775349758637        10 hours ago        64.2MB
-```
-{: .output}
-
-If you don't need an image any more and want to clear up disk space, use `docker rmi` to remove it:
-
-```
-$ sudo docker rmi ubuntu:18.04
-```
-{: .bash}
-
-```
-Untagged: ubuntu:18.04
-Untagged: ubuntu@sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d
-Deleted: sha256:775349758637aff77bf85e2ff0597e86e3e859183ef0baba8b3e8fc8d3cba51c
-Deleted: sha256:4fc26b0b0c6903db3b4fe96856034a1bd9411ed963a96c1bc8f03f18ee92ac2a
-Deleted: sha256:b53837dafdd21f67e607ae642ce49d326b0c30b39734b6710c682a50a9f932bf
-Deleted: sha256:565879c6effe6a013e0b2e492f182b40049f1c083fc582ef61e49a98dca23f7e
-Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
-```
-{: .output}
 
 
 ### Sharing the Docker image as a single file
@@ -423,6 +341,27 @@ $ ./lolcow_1Nov19.sif
 
 Sure it does!
 
+### Syntax difference
+
+Most directives in Docker map directly to a Singularity one.
+
+> ## Syntax of recipe files: Docker *vs* Singularity
+>
+> | Task            |  Docker              |  Singularity         |
+> | :-------------- |  :-----------------: |  :-----------------: |
+> |                 |  *Directive*         |  *Section*           |
+> | :-------------- | :-----------------:  | :-----------------:  |
+> | Starting image  |  `FROM`              | `Bootstrap` + `From` |
+> | Linux commands  |  `RUN`               | `%post`              |
+> | Shell variables |  `ENV`               | `%environment`       |
+> | Copying files   |  `COPY`, `ADD`       | `%files`             |
+> | Metadata        |  `LABEL`             | `%labels`, `%help`   |
+> | Default command |  `CMD, ENTRYPOINT`   | `%runscript`         |
+> | Long running    |  Not required        | `%startscript`       |
+> | Work directory  |  `WORKDIR`           | Not required         |
+> | Mount points    |  `VOLUME`            | Not required         |
+{: .callout}
+
 
 ### Bonus: example Dockerfiles
 
@@ -434,11 +373,20 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > > ## Dockerfile
 > >
 > > ```
+> > # Make sure to add comments all the time
+> > # Use ubuntu 18.04, perhaps doesn't work with later versions
 > > FROM ubuntu:18.04
 > >
-> > LABEL maintainer="brian.skjerven@pawsey.org.au"
+> > # Add several labels
+> > LABEL maintainer="someone.somewhere@pawsey.org.au"
+> > LABEL version="1.0.0"
+> > LABEL description="This text illustrates \
+> > that label-values can span multiple lines."
+> > LABEL this.show-how-complex.a.key.can.be="foo"
 > >
 > > # Install package dependencies
+> > # note here the inclusion of apt-get clean all and rm -rf
+> > # to reduce the size of the image
 > > RUN apt-get update -qq \
 > >       && apt-get -y --no-install-recommends install \
 > >          build-essential \
@@ -497,7 +445,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > > ```
 > > FROM continuumio/miniconda3:4.5.11
 > >
-> > LABEL maintainer="marco.delapierre@pawsey.org.au"
+> > LABEL maintainer="someone.somewhere@pawsey.org.au"
 > >
 > > RUN apt-get clean all && \
 > >     apt-get update && \
@@ -533,6 +481,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > > ## Dockerfile
 > >
 > > ```
+> > LABEL maintainer="someone.somewhere@pawsey.org.au"
 > > FROM rocker/tidyverse:latest
 > >
 > > RUN apt-get update -qq && apt-get -y --no-install-recommends install \
