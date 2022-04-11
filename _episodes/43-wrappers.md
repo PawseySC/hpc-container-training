@@ -1,5 +1,5 @@
 ---
-title: "Streamline the user experience: bash wrappers and modules"
+title: "Streamline the user experience: bash wrappers, modules and SHPC"
 teaching: 15
 exercises: 15
 questions:

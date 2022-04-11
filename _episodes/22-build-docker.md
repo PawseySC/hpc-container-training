@@ -23,7 +23,7 @@ keypoints:
 
 Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
 
-To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
+At present, both tools, Docker and Singulairty (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
 
 #### Singularity
 * Single file image, can be handled as any other file and shared easily;
@@ -35,11 +35,7 @@ To better inform an answer to this question, here are some of the advantages whe
 * Compatibility: image format can be run by all existing container engines, including Singularity;
 * Layered image format allows caching, for reduced build time during prototyping and development.
 
-Note how, at present, both tools require root privileges for building, implying that this step cannot be performed on HPC, and requires a dedicated machine instead.
-
-Although Singularity builds offer some interesting advantages, there's a single item that right now makes using Docker preferred in most situations.  
-It's **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
-
+Although Singularity builds offer some interesting advantages, there's a single item that right now makes using Docker preferred in most situations due to its ability to layered format and critically, its **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
 
 ### Container image formats
 
@@ -73,7 +69,7 @@ The `-t` flag is used to specify the image name (compulsory) and tag (optional).
 
 Any lowercase alphanumeric string can be used as image name; here we've used `lolcow`.  The image tag (following the colon) can be optionally used to maintain a set of different image versions on Docker Hub, and is a key feature in enabling reproducibility of your computations through containers; here we've used `1Nov19`.
 
-Adding the prefix `<Your Docker Hub account>/` to the image name is also optional and allows to push the built image to your Docker Hub registry (see below). 
+Adding the prefix `<Your Docker Hub account>/` to the image name is also optional and allows to push the built image to your Docker Hub registry (see below).
 
 The complete format for the image name looks like: `<Your Docker Hub account ^>/<Image name>:<Image tag ^>`. `^`These are optional.
 
@@ -163,7 +159,7 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 
 
 > ## Syntax of recipe files: Singularity *vs* Docker
-> 
+>
 > | Task            | Singularity          | Docker              |
 > | :-------------- | :------------------: | :-----------------: |
 > |                 | *Section*            | *Directive*         |
@@ -247,17 +243,81 @@ $ sudo docker push <your-dockerhub-account>/lolcow:1Nov19
 
 ```
 The push refers to repository [docker.io/marcodelapierre/lolcow]
-9d2959e72647: Pushed 
-317d47a452af: Pushed 
-e0b3afb09dc3: Mounted from library/ubuntu 
-6c01b5a53aac: Mounted from library/ubuntu 
-2c6ac8e5063e: Mounted from library/ubuntu 
-cc967c529ced: Mounted from library/ubuntu 
+9d2959e72647: Pushed
+317d47a452af: Pushed
+e0b3afb09dc3: Mounted from library/ubuntu
+6c01b5a53aac: Mounted from library/ubuntu
+2c6ac8e5063e: Mounted from library/ubuntu
+cc967c529ced: Mounted from library/ubuntu
 1Nov19: digest: sha256:295c5695e2b05f6123bc2d8669ec7b66e45df5000ab9fc45ce3566ae3c0d839e size: 1571
 ```
 {: .output}
 
 Your image is now publicly available for anyone to pull.
+
+### Managing containers and images
+
+By default, when containers exit, they remain cached in the system for potential future restart.  Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
+
+```
+$ sudo docker ps -a
+```
+{: .bash}
+
+```
+CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS                       PORTS               NAMES
+375a021f8674        ubuntu:18.04        "bash"                  52 seconds ago      Exited (0) 4 seconds ago                         reverent_volhard
+6000f459c132        ubuntu:18.04        "cat /etc/os-release"   57 seconds ago      Exited (0) 55 seconds ago                        hungry_bhabha
+
+```
+{: .output}
+
+It's possible to clean up cached, exited containers by means of `docker rm`; there's also an idiomatic way to clean all of them at once:
+
+```
+$ sudo docker rm $(sudo docker ps -qa)
+```
+{: .bash}
+
+```
+375a021f8674
+6000f459c132
+```
+{: .output}
+
+If I know in advance I won't need to re-run a container after it exits, I can use the runtime flag `--rm`, as in `docker run --rm`, to clean it up automatically, as we did in the example above.
+
+
+Docker stores container images in a hidden directory under its own control.  To get the list of downloaded images use `docker images`:
+
+```
+$ sudo docker images
+```
+{: .bash}
+
+```
+REPOSITORY                        TAG                      IMAGE ID            CREATED             SIZE
+ubuntu                            18.04                    775349758637        10 hours ago        64.2MB
+```
+{: .output}
+
+If you don't need an image any more and want to clear up disk space, use `docker rmi` to remove it:
+
+```
+$ sudo docker rmi ubuntu:18.04
+```
+{: .bash}
+
+```
+Untagged: ubuntu:18.04
+Untagged: ubuntu@sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d
+Deleted: sha256:775349758637aff77bf85e2ff0597e86e3e859183ef0baba8b3e8fc8d3cba51c
+Deleted: sha256:4fc26b0b0c6903db3b4fe96856034a1bd9411ed963a96c1bc8f03f18ee92ac2a
+Deleted: sha256:b53837dafdd21f67e607ae642ce49d326b0c30b39734b6710c682a50a9f932bf
+Deleted: sha256:565879c6effe6a013e0b2e492f182b40049f1c083fc582ef61e49a98dca23f7e
+Deleted: sha256:cc967c529ced563b7746b663d98248bc571afdb3c012019d7f54d6c092793b8b
+```
+{: .output}
 
 
 ### Sharing the Docker image as a single file
@@ -370,14 +430,14 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 
 
 > ## Pawsey MPI-base image
-> 
+>
 > > ## Dockerfile
 > >
 > > ```
 > > FROM ubuntu:18.04
-> > 
+> >
 > > LABEL maintainer="brian.skjerven@pawsey.org.au"
-> > 
+> >
 > > # Install package dependencies
 > > RUN apt-get update -qq \
 > >       && apt-get -y --no-install-recommends install \
@@ -387,16 +447,16 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > >          wget \
 > >       && apt-get clean all \
 > >       && rm -r /var/lib/apt/lists/*
-> > 
-> > 
+> >
+> >
 > > ### Build MPICH ###
-> > 
+> >
 > > ARG MPICH_VERSION="3.1.4"
 > > ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
 > > ARG MPICH_MAKE_OPTIONS="-j4"
-> > 
+> >
 > > WORKDIR /tmp/mpich-build
-> > 
+> >
 > > RUN wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
 > >       && tar xvzf mpich-${MPICH_VERSION}.tar.gz \
 > >       && cd mpich-${MPICH_VERSION}  \
@@ -404,23 +464,23 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > >       && make ${MPICH_MAKE_OPTIONS} \
 > >       && make install \
 > >       && ldconfig
-> > 
-> > 
+> >
+> >
 > > ### Build OSU Benchmarks ###
-> > 
+> >
 > > ARG OSU_BENCH_VERSION="5.4.2"
 > > ARG OSU_BENCH_CONFIGURE_OPTIONS="--prefix=/usr/local CC=mpicc CXX=mpicxx CFLAGS=-O3"
 > > ARG OSU_BENCH_MAKE_OPTIONS="-j4"
-> > 
+> >
 > > WORKDIR /tmp/osu-benchmark-build
-> > 
+> >
 > > RUN wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
 > >       && tar xzvf osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
 > >       && cd osu-micro-benchmarks-${OSU_BENCH_VERSION} \
 > >       && ./configure ${OSU_BENCH_CONFIGURE_OPTIONS} \
 > >       && make ${OSU_BENCH_MAKE_OPTIONS} \
 > >       && make install
-> > 
+> >
 > > WORKDIR /
 > > RUN rm -rf /tmp/*
 > > CMD ["/bin/bash"]
@@ -431,14 +491,14 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 
 
 > ## A simple Python image
-> 
+>
 > > ## Dockerfile
 > >
 > > ```
 > > FROM continuumio/miniconda3:4.5.11
-> > 
+> >
 > > LABEL maintainer="marco.delapierre@pawsey.org.au"
-> > 
+> >
 > > RUN apt-get clean all && \
 > >     apt-get update && \
 > >     apt-get upgrade -y && \
@@ -448,13 +508,13 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > >     && apt-get clean all && \
 > >     apt-get purge && \
 > >     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-> > 
+> >
 > > ARG atlas_version="2.0.1"
 > > RUN conda install -y -c bioconda -c conda-forge metagenome-atlas="$atlas_version"
-> > 
+> >
 > > RUN mkdir /databases && \
 > >     chmod go+w /databases
-> > 
+> >
 > > RUN mkdir /home/none && \
 > >     mkdir /home/none/.cache && \
 > >     cp -p $HOME/.bashrc $HOME/.profile /home/none/ && \
@@ -469,12 +529,12 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 
 
 > ## A large R image
-> 
+>
 > > ## Dockerfile
 > >
 > > ```
 > > FROM rocker/tidyverse:latest
-> > 
+> >
 > > RUN apt-get update -qq && apt-get -y --no-install-recommends install \
 > >       autoconf \
 > >       automake \
@@ -484,10 +544,10 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > >       make \
 > >       && apt-get clean all \
 > >       && rm -rf /var/lib/apt/lists/*
-> > 
+> >
 > > RUN mkdir -p $HOME/.R
 > > COPY Makevars /root/.R/Makevars
-> > 
+> >
 > > RUN Rscript -e "library('devtools')" \
 > >       -e "install_github('Rdatatable/data.table', build_vignettes=FALSE)" \
 > >       -e "install.packages('reshape2')" \

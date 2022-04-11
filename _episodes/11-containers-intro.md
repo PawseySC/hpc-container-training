@@ -16,7 +16,7 @@ keypoints:
 
 A container is an entity providing an isolated software environment (or filesystem) for an application and its dependencies.  
 
-If you have already used a Virtual Machine, or VM, you're actually already familiar with some of the concepts of a container. 
+If you have already used a Virtual Machine, or VM, you're actually already familiar with some of the concepts of a container.
 
 <!-- ![Containers vs. VMs]({{ page.root }}/fig/container_vs_vm.png) -->
 <img src="{{ page.root }}/fig/container_vs_vm.png" alt="Containers vs. VMs" width="619" height="331"/>
@@ -43,7 +43,7 @@ There are a number of reasons for using containers in your daily work:
 A few examples of how containers are being used at Pawsey include:
 
 * Bioinformatics workflows
-* Machine Learning 
+* Machine Learning
 * Python apps in radio astronomy
 * RStudio & Jupyter Notebook sessions
 * Webservers
@@ -75,11 +75,11 @@ A number of tools are available to create, deploy and run containerised applicat
 
 * **Docker**: the first engine to gain popularity, still widely used in the IT industry.  Not very suitable for HPC as it requires *root* privileges to run. We'll use it mostly to build container images.
 
-* **Singularity**: a simple, powerful container engine for the HPC world.  The main focus of this workshop.
+* **Singularity**: a simple, powerful *root*-less container engine for the HPC world. The main focus of this workshop.
 
-Other container engines are 
+* **Apptainer**: an open source offshoot of **Singularity**. Provides all the same functionality as **Singularity** and moving forward will likely become the open-source standard.
 
-* **Apptainer**: an opensource offshoot of **Singularity**. 
+Other container engines (not covered here) are
 
 * **Shifter/Sarus**: a Docker-compatible container engine, suitable for HPC.  Can run containers, cannot build them.
 

@@ -18,7 +18,7 @@ commands :
 
 ## serve            : run a local server.
 serve : lesson-md
-	${JEKYLL} serve
+	LANG="en_US.UTF-8" LC_ALL="en_US.UTF-8" bundle exec ${JEKYLL} serve
 
 ## site             : build files but do not run a server.
 site : lesson-md

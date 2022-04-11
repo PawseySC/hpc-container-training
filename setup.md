@@ -24,45 +24,38 @@ If you have macOS, you will need [XQuartz](https://www.xquartz.org) installed in
 
 
 > ## Advanced self-paced: installation DIY (Do It Yourself)
-> 
+>
 > If you have your own machine, you can install the required software yourself (might take a while).  
 > Note that you will need ***admin* privileges** in the machine to finalise the installation.
-> 
+>
 > > ## Linux box: read here
-> > 
+> >
 > > * Essential (core of the tutorial)
 > >   - Singularity : [script]({{ page.root }}/files/install-singularity.sh) \| [docs](https://singularity.hpcng.org/user-docs/3.5/quick_start.html)
-> > * Desirable (to run all the base episodes)
 > >   - Docker : [script]({{ page.root }}/files/install-docker.sh) \| [docs (unofficial)](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-docker-on-ubuntu-18-04-lts-bionic-beaver.html)
+> > * Desirable (to run all the base episodes)
 > >   - MPICH library : [script]({{ page.root }}/files/install-mpich.sh) \| [docs](https://www.mpich.org/documentation/guides/)
-> >   - Nvidia GPU driver (GPU card required)
 > >   - Slurm scheduler (can still run the MPI examples without it)
-> > * Optional (bonus episodes)
-> >   - Nextflow engine : [script]({{ page.root }}/files/install-nextflow.sh) \| [docs](https://www.nextflow.io/docs/latest/getstarted.html)
+-- > > * Optional (bonus episodes)
 > >   - Environment Modules : [script]({{ page.root }}/files/install-modules.sh) \| [docs](http://modules.sourceforge.net)
 > >   - Lmod module system : [script]({{ page.root }}/files/install-lmod.sh) \| [docs](https://lmod.readthedocs.io)
 > >   - SHPC : [script]({{ page.root }}/files/install-shpc.sh) \| [docs](https://singularity-hpc.readthedocs.io)
 > >   - Docker Compose: [script]({{ page.root }}/files/install-dockercompose.sh) \| [docs](https://docs.docker.com/compose/)
-> >   - HPCCM : [script]({{ page.root }}/files/install-hpccm.sh) \| [docs](https://github.com/NVIDIA/hpc-container-maker/blob/master/docs/getting_started.md)
 > >   - Spack : [script]({{ page.root }}/files/install-spack.sh) \| [docs](https://spack.readthedocs.io)
-> >   - Podman : [script]({{ page.root }}/files/install-podman.sh) \| [docs](https://podman.io/getting-started/installation)
-> >   - Charliecloud : [script]({{ page.root }}/files/install-charliecloud.sh) (uses Spack) \| [docs](https://hpc.github.io/charliecloud)
-> >   - Sarus : [script]({{ page.root }}/files/install-sarus.sh) \| [docs](https://sarus.readthedocs.io/en/latest/install/requirements.html)
-> >   - Enroot : [script]({{ page.root }}/files/install-enroot.sh) \| [docs](https://github.com/NVIDIA/enroot/blob/master/doc/installation.md)
-> > 
+> >
 > > **Note:** install scripts have been tested on a Ubuntu machine through a user that can run *sudo* commands without password prompts. There's no warranty they will work in your Linux box, you should consider them as templates.
 > {: .solution}
-> 
+>
 > #### macOS or Windows machine
-> 
+>
 > For *Singularity*, you will need to setup a Linux virtual machine, and then follow the same instructions as above.  
 > It's not as bad as it sounds... the main two options are:
 >   - Vagrant: follow these instructions by Sylabs on [Setting up Singularity with Vagrant](https://singularity.hpcng.org/admin-docs/3.5/installation.html#installation-on-windows-or-mac) (*macOS* users: DO NOT use the proposed *Singularity Desktop*, use Vagrant instead);
 >   - Multipass: follow instructions from the [Multipass Homepage](https://multipass.run).
-> 
+>
 > For *Docker*, you can download and run installers for [macOS](https://hub.docker.com/editions/community/docker-ce-desktop-mac/) and [Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows/).
-> 
+>
 > #### All platforms
-> 
+>
 > A more detailed discussion on how to setup Singularity can be found in a dedicated episode of this tutorial.
 {: .challenge}
