@@ -5,12 +5,10 @@
 #SBATCH --ntasks-per-node=2
 #SBATCH --time=00:20:00
 
-image="library://marcodelapierre/beta/openfoam:v2012"
+image="docker://quay.io/pawsey/openfoamlibrary:v2012"
 
 # this configuration depends on the host
-module unload xalt
 module load singularity
-
 
 # pre-processing
 srun -n 1 \
@@ -36,4 +34,3 @@ srun -n $SLURM_NTASKS \
 srun -n 1 \
   singularity exec $image \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
-

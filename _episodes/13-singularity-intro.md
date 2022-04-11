@@ -1,7 +1,7 @@
 ---
 title: "Basics of Singularity"
-teaching: 20
-exercises: 20
+teaching: 15
+exercises: 10
 questions:
 objectives:
 - Download container images
@@ -16,65 +16,8 @@ keypoints:
 - The most commonly used registries are Docker Hub, Red Hat Quay and BioContainers
 ---
 
-### Get ready for the hands-on
 
-Before we start, let us ensure we have got the required files to run the tutorials.
-
-If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
-
-```
-$ cd ~
-$ git clone https://github.com/PawseySC/singularity-containers
-$ cd singularity-containers
-$ export TUTO=$(pwd)
-```
-{: .bash}
-
-
-> ## Want to save time later in the tutorial?
->
-> > ## Read this
-> > Open a second terminal in the machine where you're running the tutorial, then run the script `pull_big_images.sh` to start downloading a few images that you'll require later:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ nohup bash ./pull_big_images.sh &
-> > ```
-> > {: .bash}
-> >
-> > **In alternative**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
-> >
-> > ```
-> > $ cd $TUTO/demos
-> > $ sbatch ./sbatch_pull_big_images.sh
-> > ```
-> > {: .bash}
-> >
-> > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
-> >
-> {: .solution}
-{: .challenge}
-
-
-> ## Are you running on a shared HPC system?
->
-> If you're running this tutorial on a shared system (*e.g.* on Zeus or Magnus at Pawsey), you should use one of the compute nodes rather than the login node.  You can get this setup by using an interactive scheduler allocation, for instance on Zeus with Slurm:
->
-> ```
-> $ salloc -n 1 -t 4:00:00
-> ```
-> {: .bash}
->
-> ```
-> salloc: Granted job allocation 3453895
-> salloc: Waiting for resource configuration
-> salloc: Nodes z052 are ready for job
-> ```
-> {: .output}
-{: .callout}
-
-
-### Singularity: a container engine for HPC
+### Singularity
 
 As of November 2021 (**update!**), Singularity is now two distinct projects:
 * [Apptainer](https://apptainer.org), now part of the Linux Foundation project, is maintained by [Apptainer](https://apptainer.org) on their [GitHub](https://github.com/apptainer/apptainer). This is the open-source verison of Singularity and provides all the same functionality. For details about this transition see [here](https://apptainer.org/news/community-announcement-20211130/).
@@ -85,15 +28,10 @@ These two variants are equivalent up until version 3.8.5, released on May 2021.
 Singularity was designed from scratch as a container engine for HPC applications, which is clearly reflected in some of its main features:
 
 * *unprivileged* runtime: Singularity containers do not require the user to hold root privileges to run (the Singularity executable needs to be installed and owned by *root*, though);
-
 * *integration*, rather than *isolation*, by default: same user as host, same shell variables inherited by host, current directory bind mounted, communication ports available; as a result, launching a container requires a much simpler syntax than Docker;
-
 * interface with job schedulers, such as *Slurm* or *PBS*;
-
 * ability to run MPI enabled containers using host libraries;
-
 * native execution of GPU enabled containers;
-
 * unfortunately, *root* privileges are required to build container images: users can build images on their personal laptops or workstations, on the cloud, or via a Remote Build service.
 
 This tutorial assumes Singularity version 3.0 or higher.  Version **3.7.0 or higher** is recommended as it offers a smoother, more bug-free experience.

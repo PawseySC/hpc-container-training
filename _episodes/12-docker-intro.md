@@ -1,6 +1,6 @@
 ---
 title: "Basics of Docker"
-teaching: 10
+teaching: 15
 exercises: 10
 questions:
 objectives:

@@ -13,31 +13,32 @@ keypoints:
 - MPI performance of containerised applications almost coincide with those of a native run
 ---
 
+We're using OSU MPI tests, by leveraging an MPI library.  
+
 
 ### Let's run a MPI-enabled application in a container!
 
-We're going to start this episode with actually running a practical example, and then discuss the way this all works later on.  
-We're using OSU MPI tests,  by leveraging an MPI library.  
+We're going to start this episode with actually running a practical example, and then discuss the way this all works later on. We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
 
-First, let us cd into the demo directory and download the OpenFoam container image:
+First, cd into a demo directory and download the OpenFoam (computational fluid dynamics simulation code) container image from [quay.io](https://quay.io/repository/pawsey/openfoam?tab=info):
 
 ```
-$ cd $TUTO/demos/openfoam
-$ singularity pull library://marcodelapierre/beta/openfoam:v2012
+$ cd $TUTO/demo/openfoam/
+$ singularity pull docker pull quay.io/pawsey/openfoam
 ```
 {: .bash}
 
-Now, let us run the sample simulation with:
+Now, let us run the sample simulation. OpenFoam first generates initial conditions in serial and then runs a simulation with MPI. A sample script for running the container is provided in the demo directory (to directly copy the script without cloning this tutorial repo, copy [this file](https://github.com/PawseySC/hpc-container-training/blob/gh-pages/demos/openfoam/mpi_mpirun.sh)). Run the script:
 
 ```
 $ ./mpi_mpirun.sh
 ```
 {: .bash}
 
-**In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the Slurm scheduler to submit the job script `mpi_pawsey.sh`:
+**Alternatively**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the Slurm scheduler to submit the job script `mpi_slurm.sh`:
 
 ```
-$ sbatch mpi_pawsey.sh
+$ sbatch mpi_slurm.sh
 ```
 {: .bash}
 
@@ -72,36 +73,6 @@ drwxr-xr-x 3 user000 tutorial    76 Nov 16 22:47 20
 We ran using *2 MPI* processes, who created outputs in the directories `processor0` and `processor1`, respectively.  The final reconstruction creates results in the directory `20` (which stands for the *20th* and last simulation step in this very short demo run).
 
 What has just happened?
-
-
-### Bonus: a second OpenFoam example with visual output
-
-If time allows, you may want to try out a second simulation example, which models the air flow around a two-dimensional wing profile.  This is the required setup:
-
-```
-$ cd $TUTO/demos/openfoam_visual/mpirun
-$ ./mpirun.sh
-```
-{: .bash}
-
-**In alternative**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the available Slurm setup:
-
-```
-$ cd $TUTO/demos/openfoam_visual/pawsey
-$ sbatch mpi_pawsey.sh
-```
-{: .bash}
-
-This run uses 4 MPI processes and takes about 5-6 minutes.  Upon completion, the file `wingMotion2D_pimpleFoam/wingMotion2D_pimpleFoam.foam` can be opened with the visualisation package *Paraview*, if you have access to it (at Pawsey it is available on Topaz).  Here are a couple of snapshots:
-
-<table>
-  <tr>
-    <th><img src="{{ page.root }}/fig/wing_p_pressure.png" alt="Wing pressure map" width="400"/></th>
-    <th><img src="{{ page.root }}/fig/wing_nut_viscosity.png" alt="Wing viscosity map" width="400"/></th>
-  </tr>
-</table>
-
-We have just visualised the results of this containerised simulation!
 
 
 ### A batch script for MPI applications with containers
@@ -167,17 +138,57 @@ mpirun -n $NTASKS \
 Here, `mpirun` is the MPI launcher, *i.e.* the tool that is in charge for spawning the multiple MPI processes that will make the workflow run in parallel.  
 Note how `singularity` can be executed through the launcher as any other application would.
 
-Under the hood, the MPI processes outside of the container (spawned by `mpirun`) will work in tandem with the containerized MPI code to instantiate the job.  
-There are a few implications here...
+Similarly, for running MPI applications through Slurm, the `srun` command is used in `mpi_slurm.sh`:
 
+```
+#!/bin/bash -l
+
+#SBATCH --job-name=mpi
+#SBATCH --ntasks=2
+#SBATCH --ntasks-per-node=2
+#SBATCH --time=00:20:00
+
+image="docker://quay.io/pawsey/openfoamlibrary:v2012"
+
+# this configuration depends on the host
+module load singularity
+
+# pre-processing
+srun -n 1 \
+  singularity exec $image \
+  blockMesh | tee log.blockMesh
+
+srun -n 1 \
+  singularity exec $image \
+  topoSet | tee log.topoSet
+
+srun -n 1 \
+  singularity exec $image \
+  decomposePar -fileHandler uncollated | tee log.decomposePar
+
+
+# run OpenFoam with MPI
+srun -n $SLURM_NTASKS \
+  singularity exec $image \
+  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
+
+
+# post-processing
+srun -n 1 \
+  singularity exec $image \
+  reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
+```
+{: .bash}
+
+Under the hood, the MPI processes outside of the container (spawned by `mpirun` or `srun`) will work in tandem with the containerized MPI code to instantiate the job.  
+There are a few implications here...
 
 ### Requirements for the MPI + container combo
 
 Let's discuss what the above mentioned implications are.
-
 * A host MPI installation must be present to spawn the MPI processes.
+* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime. *Statically* linking MPI libraries at compilation time will force the application to use the MPI library present inside the container, which may lead to compatibility issues with the hosts MPI library and neglect any optimisations present in the host MPI installation. Note: dynamic linking is typically the default behaviour on Linux systems.
 
-* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime.  Note how dynamic linking is typically the default behaviour on Linux systems.  
 A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
 
 ```
@@ -209,25 +220,22 @@ ldconfig
 
 > ## Base MPI image at Pawsey
 >
-> Pawsey maintains an MPICH base image at [pawsey/mpich-base](https://hub.docker.com/r/pawsey/mpich-base).  
+> Pawsey maintains an MPICH base image at [pawsey/mpich-base](https://quay.io/pawsey/mpich-base).  
 > At the moment, only a Docker image is provided, which of course can also be used by Singularity.
 {: .callout}
 
 
 * The container and host MPI installations need to be *ABI* (Application Binary Interface) *compatible*. This is because the application in the container is built with the former but runs with the latter.  
-At present, there are just two families of MPI implementations, not ABI compatible with each other: MPICH (with IntelMPI and MVAPICH) and OpenMPI.  
-If you anticipate your application will run in systems with non ABI compatible libraries, you will need to build variants of the image for the two MPI families.
-
+At present, there are just two families of MPI implementations not ABI compatible with each other: MPICH (with IntelMPI and MVAPICH) and OpenMPI.  If you anticipate your application will run in systems with non ABI compatible libraries, you will need to build variants of the image for the two MPI families.
 
 > ## MPI implementations at Pawsey
 >
-> At present, all Pawsey systems have installed at least one MPICH ABI compatible implementation: CrayMPICH on the Crays (*Magnus* and *Galaxy), IntelMPI on *Zeus* and *Topaz*.  Therefore, MPICH is the recommended MPI library to install in container images.  
+> At present, all Pawsey systems have installed at least one MPICH ABI compatible implementation: CrayMPICH on the Crays (*Setonix* *Magnus* and *Galaxy), IntelMPI on *Zeus* and *Topaz*.  Therefore, MPICH is the recommended MPI library to install in container images.  
 > Zeus and Topaz also have OpenMPI, so images built over this MPI family can run in these clusters, upon appropriate configuration of the shell environment (see below).
 {: .callout}
 
 
-* Bind mounts and environment variables need to be setup so that the containerised MPI application can use the host MPI libraries at runtime.  Bind mounts can be configured by the administrators, or set up through variables. We're discussing the latter way here.  
-In the current example we have:
+* Bind mounts and environment variables need to be setup so that the containerised MPI application can use the host MPI libraries at runtime. Bind mounts can be configured by the administrators, or set up through variables. We're discussing the latter way here. The current example script has:
 
 ```
 export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
@@ -238,7 +246,7 @@ export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
 {: .bash}
 
 Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installation is (MPICH in this case).  
-The second variable, SINGULARITYENV_LD_LIBRARY_PATH, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
+The second variable, `SINGULARITYENV_LD_LIBRARY_PATH`, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
 
 > ## Interconnect libraries and containers
 >
@@ -257,28 +265,11 @@ The second variable, SINGULARITYENV_LD_LIBRARY_PATH, ensures that at runtime the
 {: .callout}
 
 
-### Singularity interface to Slurm
-
-Now, if we have a look at the script variant for the Slurm scheduler, `mpi_pawsey.sh`, we'll see the key difference is that every OpenFoam command is executed via `srun`:
-
-```
-srun -n $SLURM_NTASKS \
-  singularity exec openfoam_v2012.sif \
-  simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
-```
-{: .bash}
-
-`srun` is the Slurm wrapper for the MPI launcher, `mpirun`.  Other schedulers will require a different command.  
-In practice, all we had to do was to replace `mpirun` with `srun`.  This is because Singularity implements a native interface to schedulers, so it can be executed through `srun` as other packages would.
-
-Note in the script how, when using schedulers, it is good practice to execute all application commands through `srun`, even those that only use one core.  
-
 
 ### MPI performance: container *vs* bare metal
 
 What's the performance overhead in running an MPI application through containers?
-
-Well, the benchmark figures just below reveal it's quite small...good news!
+Well, the benchmark figures using the OSU MPI test suite below reveal it's quite small...good news!
 
 <!-- ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png) -->
 <img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU bandwidth test" width="651" height="489"/>
@@ -288,3 +279,5 @@ Well, the benchmark figures just below reveal it's quite small...good news!
 
 <!-- ![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png) -->
 <img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU collective latency test" width="651" height="489"/>
+
+### Best practices when building MPI containers

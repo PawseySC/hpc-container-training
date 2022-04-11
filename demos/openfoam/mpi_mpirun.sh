@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NTASKS="2"
-image="library://marcodelapierre/beta/openfoam:v2012"
+image="docker://quay.io/pawsey/openfoamlibrary:v2012"
 
 # this configuration depends on the host
 export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
@@ -31,4 +31,3 @@ mpirun -n $NTASKS \
 # post-processing
 singularity exec $image \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
-

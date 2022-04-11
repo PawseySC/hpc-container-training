@@ -383,6 +383,9 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > > LABEL description="This text illustrates \
 > > that label-values can span multiple lines."
 > > LABEL this.show-how-complex.a.key.can.be="foo"
+> > # Typically containers do not provide extensive metadata but this is poor
+> > # practice. Try adding labels that could be useful such as tags
+> > LABEL tags="ubuntu/18.04, mpich/3.1.4, osu/5.4.2"
 > >
 > > # Install package dependencies
 > > # note here the inclusion of apt-get clean all and rm -rf
@@ -440,6 +443,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 
 > ## A simple Python image
 >
+> This docker file lacks useful metadata. Consider adding it.
 > > ## Dockerfile
 > >
 > > ```
