@@ -1,6 +1,6 @@
 ---
 title: "MPI containers"
-teaching: 10
+teaching: 15
 exercises: 10
 questions:
 objectives:
@@ -10,11 +10,8 @@ keypoints:
 - You need to build your application in the container with an MPI version which is ABI compatible with MPI libraries in the host
 - Appropriate environment variables and bind mounts are required at runtime to make the most out of MPI applications (sys admins can help)
 - Singularity interfaces almost transparently with HPC schedulers such as Slurm
-- MPI performance of containerised applications almost coincide with those of a native run
+- MPI performance of containerised applications almost coincide with those of a native run when host MPI properly exposed to container
 ---
-
-We're using OSU MPI tests, by leveraging an MPI library.  
-
 
 ### Let's run a MPI-enabled application in a container!
 
@@ -181,13 +178,14 @@ srun -n 1 \
 {: .bash}
 
 Under the hood, the MPI processes outside of the container (spawned by `mpirun` or `srun`) will work in tandem with the containerized MPI code to instantiate the job.  
-There are a few implications here...
+There are a few implications here ...
 
 ### Requirements for the MPI + container combo
 
 Let's discuss what the above mentioned implications are.
 * A host MPI installation must be present to spawn the MPI processes.
-* An MPI installation is required in the container, to compile the application.  Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime. *Statically* linking MPI libraries at compilation time will force the application to use the MPI library present inside the container, which may lead to compatibility issues with the hosts MPI library and neglect any optimisations present in the host MPI installation. Note: dynamic linking is typically the default behaviour on Linux systems.
+* An MPI installation is required in the container, to compile the application. Also, during build the application must be linked *dynamically* to the MPI libraries, so as to have the capability of using the host ones at runtime.
+    * *Statically* linking MPI libraries at compilation time will force the application to use the MPI library present inside the container, which may lead to compatibility issues with the hosts MPI library and neglect any optimisations present in the host MPI installation. Note: dynamic linking is typically the default behaviour on Linux systems.
 
 A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
 
@@ -245,8 +243,7 @@ export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
 ```
 {: .bash}
 
-Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installation is (MPICH in this case).  
-The second variable, `SINGULARITYENV_LD_LIBRARY_PATH`, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
+Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installation is (MPICH in this case).  The second variable, `SINGULARITYENV_LD_LIBRARY_PATH`, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
 
 > ## Interconnect libraries and containers
 >
@@ -268,16 +265,19 @@ The second variable, `SINGULARITYENV_LD_LIBRARY_PATH`, ensures that at runtime t
 
 ### MPI performance: container *vs* bare metal
 
-What's the performance overhead in running an MPI application through containers?
-Well, the benchmark figures using the OSU MPI test suite below reveal it's quite small...good news!
+What's the performance overhead in running an MPI application through containers? So long as the container engine has been run to utilise the host's MPI library, the difference is typically quite small.
+The benchmark figures using the OSU MPI test suite below reveal percent differences.
 
-<!-- ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png) -->
-<img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU bandwidth test" width="651" height="489"/>
+> ## Performance of MPI communication using OSU test using host MPI libraries
+> <!-- ![OSU bandwidth test]({{ page.root }}/fig/OSU_Bandwidth.png) --> <img src="{{ page.root }}/fig/OSU_Bandwidth.png" alt="OSU bandwidth test" width="651" height="489"/>
+> <!-- ![OSU point-to-point latency test]({{ page.root }}/fig/OSU_Latency_P2P.png) --> <img src="{{ page.root }}/fig/OSU_Latency_P2P.png" alt="OSU point-to-point latency test" width="651" height="489"/>
+> <!-- ![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png) --> <img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU collective latency test" width="651" height="489"/>
+{: .callout}
 
-<!-- ![OSU point-to-point latency test]({{ page.root }}/fig/OSU_Latency_P2P.png) -->
-<img src="{{ page.root }}/fig/OSU_Latency_P2P.png" alt="OSU point-to-point latency test" width="651" height="489"/>
-
-<!-- ![OSU collective latency test]({{ page.root }}/fig/OSU_Latency_Coll.png) -->
-<img src="{{ page.root }}/fig/OSU_Latency_Coll.png" alt="OSU collective latency test" width="651" height="489"/>
-
-### Best practices when building MPI containers
+### How you should build containers requiring MPI
+The benchmarking provided by OSU test suite actually provides an excellent way of checking that MPI is running correctly in a container. Poor performance or MPI errors can be identified early in the container build process by including these tests in the container.
+> ## Recommendations for MPI applications
+> - Build base MPI containers, one for each ABI MPI library (e.g., OpenMPI and MPICH)
+> - Build MPI tests suite, [OSU micro-benchmarks](https://ulhpc-tutorials.readthedocs.io/en/latest/parallel/mpi/OSU_MicroBenchmarks/) for each of these MPI containers
+> - Build your application for each variant of MPI using the OSU base container.
+{: .checklist}
