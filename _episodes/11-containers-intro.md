@@ -24,11 +24,12 @@ If you have already used a Virtual Machine, or VM, you're actually already famil
 The key difference here is that VMs virtualise **hardware** while containers virtualise **operating systems**.  There are other differences (and benefits), in particular containers are:
 
 * lighter weight to run (less CPU and memory usage, faster start-up times)
-
 * smaller in size (thus easier to transfer and share)
-
 * modular (possible to combine multiple containers that work together)
 
+Since containers do not virtualise the hardware, containers must be built using the same architecture
+as the machine they are going to be deployed on. For example, Pawsey systems use ubiquitous `x86_64` CPUs. There is a growing number of machines using `arm64` CPUs.
+Containers built for one architecture cannot run on the other.
 
 ### Containers and your workflow
 

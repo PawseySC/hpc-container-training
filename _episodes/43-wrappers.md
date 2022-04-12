@@ -17,89 +17,95 @@ keypoints:
 
 ### Can we standardise the use of containers, to simplify the required syntax?
 
-To answer this question, let's grab the BLAST container we used in the demo on sharing files with the host (the image will be quickly pulled from cache if you ran that demo):
+Running containers using the host MPI requires setting a number of environment
+variables along with the additional standard syntax to run the container itself.
+There are several possible ways of simplifying commands: bash wrappers; modules
+and [SHPC](https://singularity-hpc.readthedocs.io/en/latest/),
+which provides a framework combining the former two methods.
+
+Now, let's think about the typical usage of a containerised application.  
+Once the container image is available in the local disk, in the vast majority of
+cases you'll use it to execute some command in this way.
+As a practical example, let's grab the `lolcow` container used in earlier episodes.
 
 ```
-$ cd $TUTO/demos/wrap_blast
-$ singularity pull docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
-```
-{: .bash}
-
-Now, let's think about the typical usage of a containerised application.  Once the container image is available in the local disk, in the vast majority of cases you'll use it to execute some command in this way:
-
-```
-singularity exec ./blast_2.9.0--pl526h3066fca_4.sif <CMD> <ARGS>
+singularity exec ./lolcow.sif <CMD> <ARGS>
 ```
 {: .source}
 
-As a plain, useful example, let's suppose we want to get the help output from the `blastp` command:
+As a plain, useful example, let's suppose we want to get the help output from the `cowsay` command:
 
 ```
-$ singularity exec ./blast_2.9.0--pl526h3066fca_4.sif blastp -help
+$ singularity exec ./lolcow.sif cowsay -h
 ```
 {: .bash}
 
-We can break this into logical parts; let's write a script called `blastp.1` for convenience:
+We can break this into logical parts; let's write a script called `cowsay.1` for convenience:
 
 ```
 #!/bin/bash
 
+# point to the image directory
+# and the name of the container respectively
 image_dir="."
-image_name="blast_2.9.0--pl526h3066fca_4.sif"
+image_name="lolcow.sif"
 
+# define the command
 cmd="blastp"
 
+# and grab all commands passed to the script via the command line
 args="$@"
 
+# call singularity
 singularity exec $image_dir/$image_name $cmd $args
 ```
 {: .source}
 
-Look at how general the expression in the last line of this script is!  
-We're also using shell variables to express tool- and command- specific information.  Of these, the image location `image_dir` and name `image_name` are set at the time we pull the image.  The command name, `cmd`, might change from command to command.  So, for instance, we might write a script for the command `makeblastdb` by only changing that line:
+Shell variables express tool- and command- specific information, such as the image
+location `image_dir` and name `image_name`.  The command name, `cmd`, might change
+from command to command. How about the value we assigned to the command arguments
+variable, `args`?  Well, that's bash syntax.  If you execute this script, bash will
+assign to `$@` the full list of arguments that you append to the script in the command line.  
+
+To see this in practice,make the `cowsay.1` script executable (using `chmod`) and run it with the `-h` argument:
 
 ```
-#!/bin/bash
-
-image_dir="."
-image_name="blast_2.9.0--pl526h3066fca_4.sif"
-
-cmd="makeblastdb"
-
-args="$@"
-
-singularity exec $image_dir/$image_name $cmd $args
-```
-{: .source}
-
-How about the value we assigned to the command arguments variable, `args`?  Well, that's bash syntax.  If you execute this script, bash will assign to `$@` the full list of arguments that you append to the script in the command line.  
-To see a practical example, let's make the `blastp.1` script executable (using `chmod`) and run it with the `-help` argument:
-
-```
-$ chmod +x blastp.1
+$ chmod +x cowsay.1
+$ ./cowsay.1 -h
 ```
 {: .bash}
 
 ```
-$ ./blastp.1 -help
-```
-{: .bash}
-
-```
-USAGE
-  blastp [-h] [-help] [-import_search_strategy filename]
-[..]
- -use_sw_tback
-   Compute locally optimal Smith-Waterman alignments?
+cow{say,think} version 3.03, (c) 1999 Tony Monroe
+Usage: cowsay [-bdgpstwy] [-h] [-e eyes] [-f cowfile]
+          [-l] [-n] [-T tongue] [-W wrapcolumn] [message]
 ```
 {: .output}
 
-From the output, you can see that the `blastp` command actually got the `-help` flag right, and this was thanks to the usage of `$@` in the script.
-
-So to summarise this section, we've written a simple bash script that wraps around the Singularity `exec` approach, so that to run `blastp` from a container you simply type:
+The generality of the wrapper script means that to write a script for the command
+`lolcat`, we need only change that line:
 
 ```
-$ ./blastp.1 <ARGS>
+#!/bin/bash
+
+image_dir="."
+image_name="lolcow.sif"
+
+cmd="lolcat"
+
+args="$@"
+
+singularity exec $image_dir/$image_name $cmd $args
+```
+{: .source}
+
+
+From the output, you can see that the `cowsay` command actually got the `-h` flag right, and this was thanks to the usage of `$@` in the script.
+
+So to summarise this section, we've written a simple bash script that wraps around the Singularity `exec` approach, so that to run `cowsay` from a container you simply type:
+
+```
+$ ./cowsay.1 <ARGS>
 ```
 {: .bash}
 
@@ -112,29 +118,34 @@ In the first iteration of a bash wrapper for containerised commands, we need to 
 
 **Yes**.  With a couple of extra bash commands and assumptions, we can make it so that the only required information will be the **container image name**.
 
-First, let's get rid of the command name.  
-Let's assume that we're calling the wrapper with the same name of the command we want it to execute.  Then, we're going to use the bash variable `$0`; used inside a script, it contains the full path of the script itself; we're also using the bash command `basename`, that extract a file or directory name out of its full path.  The `cmd` variable becomes:
+First, let's get rid of the command name. Let's assume that we're calling the
+wrapper with the same name of the command we want it to execute.  Then, we're
+going to use the bash variable `$0`; used inside a script, it contains the full
+path of the script itself; we're also using the bash command `basename`, that
+extract a file or directory name out of its full path.  The `cmd` variable becomes:
 
 ```
 cmd="$(basename $0)"
 ```
 {: .source}
 
-And now, let's generalise the image location.  
-Let's assume that we're storing the wrappers in the same directory where the image is located.  Then, we can use the bash command `dirname` to extract the location of a file or directory out of its full path.  The `image_dir` variable becomes:
+Now let's generalise the image location.  Let's assume that we're storing the
+wrappers in the same directory where the image is located. Then, we can use the
+bash command `dirname` to extract the location of a file or directory out of its
+full path. The `image_dir` variable becomes:
 
 ```
 image_dir="$(dirname $0)"
 ```
 {: .source}
 
-So we can now have a general bash wrapper for BLAST commands from the container image `blast_2.9.0--pl526h3066fca_4.sif`:
+So we can now have a general bash wrapper for the commands from the container image `lolcow.sif`:
 
 ```
 #!/bin/bash
 
 image_dir="$(dirname $0)"
-image_name="blast_2.9.0--pl526h3066fca_4.sif"
+image_name="lolcow.sif"
 
 cmd="$(basename $0)"
 
@@ -144,26 +155,21 @@ singularity exec $image_dir/$image_name $cmd $args
 ```
 {: .source}
 
-To create a wrapper for `blastp`, all we have to do is to create a script named `blastp` with that content.  Then, we can do the same for `makeblastdb`, `blastn`, `blastx` and so on.  
-To limit the number of files, we might even just have a single copy of this script, *e.g.* named `blastp`, and then create symbolic links for the other commands, for instance:
+To create a wrapper for `cowsay`, all we have to do is to create a script named
+`cowsay` with that content.  Then, we can do the same for any other commands such as
+`fortune`, `lolcat`, and so on. In fact, we need not even create files for each
+command. Instead we create a single script, *e.g.* named `lolcow_commands.sh`, and
+then create appropriately named symbolic links for the commands, for instance:
 
 ```
-$ ln -s blastp makeblastdb
+$ ln -s lolcow_commands.sh cowsay
+$ ln -s lolcow_commands.sh lolcat
 ```
 {: .bash}
 
-What if we need bash wrappers for the Trinity assembler from the pulled image ?  
-Well, just make a new script with a different `image_name`, named according to the required command:
-
-```
-image_name="trinityrnaseq_2.8.6.sif"
-```
-{: .source}
-
-
 ### How general is this approach?
 
-Well, quite general probably.  It can be used every time you would use containers with this Singularity syntax:
+Well, quite general probably. It can be used every time you would use containers with this Singularity syntax:
 
 ```
 singularity exec <IMAGE> <CMD> <ARGS>
@@ -174,21 +180,19 @@ This will also work with MPI containers and Slurm, as the corresponding syntax d
 
 ```
 mpirun -n <NNODES> singularity exec <IMAGE> <CMD> <ARGS>
-srun -n <NNODES> singularity exec <IMAGE> <CMD> <ARGS>
+srun singularity exec <IMAGE> <CMD> <ARGS>
 ```
 {: .source}
 
-Of course there are some corner cases.  
-For instance, for GPU enabled containers, after `exec` in the wrapper you will need to add `--nv` (Nvidia) or `--rocm` (AMD).  
-Using overlays requires adding `--overlay <OVERLAY FILEPATH>`, with the file path possibly specified using a shell variable that you can define prior to executing the wrapper.  
-Wrappers to launch GUI sessions will also require some tweaking.  
-
+Of course there are some corner cases:
+* GPU enabled containers require extra singularity arguments: after `exec` in the wrapper you will need to add `--nv` (Nvidia) or `--rocm` (AMD).
+* Using overlays requires adding `--overlay <OVERLAY FILEPATH>`, with the file path possibly specified using a shell variable that you can define prior to executing the wrapper.  
+* Wrappers to launch GUI sessions will also require some tweaking.  
+* Applications where environment variables along with command line arguments impact how commands run.
 
 ### What if we need to bind mount some host directories?
 
-This is a case worth commenting in this context.  
-
-Specifying the paths to be bind mounted as additional flags in the wrappers is not really general nor portable.  
+Specifying the paths to be bind mounted as additional flags in the wrappers is not really general nor portable. Neither are
 
 So what you want to do here is to use `$SINGULARITY_BINDPATH`, defining the required paths prior to execution of the application.  
 If you have a standard setup on your system, where all the data go under the same parent directory (*e.g.* `/data`), you might even want to define the variable in the startup scripts (`~/.bashrc`,...).  This can be quite a good practice in simplifying your production environment, and making it more robust.  
