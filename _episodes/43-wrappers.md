@@ -189,17 +189,22 @@ Of course there are some corner cases:
 * Using overlays requires adding `--overlay <OVERLAY FILEPATH>`, with the file path possibly specified using a shell variable that you can define prior to executing the wrapper.  
 * Wrappers to launch GUI sessions will also require some tweaking.  
 * Applications where environment variables along with command line arguments impact how commands run.
+* Applications that need to bind mount a dynamic set of host directories along with command line arguments.
 
-### What if we need to bind mount some host directories?
+> ## How to address dynamic bind mount set
+> Specifying the paths to be bind mounted as additional flags in the wrappers is
+> not really general nor portable. What you want to do here is to use `$SINGULARITY_BINDPATH`
+> to define the maximal required paths prior to execution of the application.  
+> If you have a standard setup on your system, where all the data go under the
+> same parent directory (*e.g.* `/data`), you might even want to define the
+> variable in the startup scripts (`~/.bashrc`,...).  This can be quite a good
+> practice in simplifying your production environment, and making it more robust.  
+>
+> The singularity module provided on Pawsey HPC systems adds `/group` and `/scratch`
+> to the the bind path, so you don't have to worry about bind mounting data directories at all.
+{: .callout}
 
-Specifying the paths to be bind mounted as additional flags in the wrappers is not really general nor portable. Neither are
-
-So what you want to do here is to use `$SINGULARITY_BINDPATH`, defining the required paths prior to execution of the application.  
-If you have a standard setup on your system, where all the data go under the same parent directory (*e.g.* `/data`), you might even want to define the variable in the startup scripts (`~/.bashrc`,...).  This can be quite a good practice in simplifying your production environment, and making it more robust.  
-In this respect, in Pawsey HPC systems the singularity module adds `/group` and `/scratch` to the the bind path, so you don't have to worry about bind mounting data directories at all.
-
-
-### Bonus: use modules to handle bash wrappers
+### Using modules to handle bash wrappers
 
 So far in this episode, we've devised a scenario to deploy a containerised application in a streamlined way:
 
@@ -207,30 +212,35 @@ So far in this episode, we've devised a scenario to deploy a containerised appli
 2. pull it in a directory;
 3. in that same directory, create bash wrappers for the commands you need to execute from that container.
 
-If you're in a system with lots of other applications, you might want to tidy up the environment by using modules.  Here, we're using the [Environment Modules](http://modules.sourceforge.net) implementation; an alternative one is the [Lmod](https://lmod.readthedocs.io) module system.  This tutorial provides Linux template installation scripts for both: see [Environment Modules script]({{ page.root }}/files/install-modules.sh) and [Lmod script]({{ page.root }}/files/install-lmod.sh).  
-**Note that** discussing modules in details is off scope here, we're just using them to show how to organise containerised applications.
+If you're in a system with lots of other applications, you might want to tidy up
+the environment by using modules.  Here, we're using the [Environment Modules](http://modules.sourceforge.net)
+implementation; an alternative one is the [Lmod](https://lmod.readthedocs.io)
+module system. This tutorial provides Linux template installation scripts for
+both: see [Environment Modules script]({{ page.root }}/files/install-modules.sh)
+and [Lmod script]({{ page.root }}/files/install-lmod.sh).  
+**Note that** discussing modules in details is out-of-scope here, we're just
+using them to show how to organise containerised applications.
 
-We have just said that all relevant files for our containerised application, *e.g.* BLAST, are in a single location.  
-To run this example, there's already a directory made ready in your current work directory, `$TUTO/demos/wrap_blast`, namely `apps/blast/2.9.0/bin`.  It contains four bash wrappers:
+All relevant bash wrapper scripts for our containerised application, *e.g.* are in a single location. To run this example, there's already a directory made ready in your current work directory, `$TUTO/demos/wrap_container`, namely `apps/lolcow/1.0.0/bin`. It contains four bash wrappers:
 
 ```
-$ ls apps/blast/2.9.0/bin
+$ ls apps/lolcow/1.0/bin
 ```
 {: .bash}
 
 ```
-blastn      blastp      blastx      makeblastdb
+cowsay     fortune     lolcat     lolcow
 ```
 {: .output}
 
 To get ready for this example, let us also pull the BLAST image there:
 
 ```
-$ singularity pull --dir apps/blast/2.9.0/bin docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4
+$ singularity pull --dir apps/lolcow/1.0.0/bin ???
 ```
 {: .bash}
 
-Now, we can think of a minimal modulefile to setup BLAST in our environment:
+Now, we can think of a minimal modulefile to setup `lolcow` in our environment:
 
 ```
 #%Module1.0######################################################################
@@ -238,21 +248,22 @@ Now, we can think of a minimal modulefile to setup BLAST in our environment:
 ## blast modulefile
 ##
 proc ModulesHelp { } {
-    puts stderr "\tModule for blast version 2.9.0\n"
-    puts stderr "\tThis module uses the container image docker://quay.io/biocontainers/blast:2.9.0--pl526h3066fca_4"
+    puts stderr "\tModule for lolcow version 1.0.0\n"
+    puts stderr "\tThis module uses the container image ???"
 }
 
-module-whatis   "edits the PATH to use the tool blast version 2.9.0"
+module-whatis   "edits the PATH to use the lolcow commands, version 1.0.0"
 
-prepend-path     PATH            $env(TUTO)/demos/wrap_blast/apps/blast/2.9.0/bin
+prepend-path     PATH            $env(TUTO)/demos/wrap_lolcow/apps/blast/1.0.0/bin
 ```
 {: .source}
 
-In general, the string associated to `PATH` will need to be customised case by case, same as the `help` and `whatis` strings.  
-A copy of this modulefile is under `modulefiles/` in the current path.  
-Shall we try it?  Let's go!
+In general, the string associated to `PATH` will need to be customised case-by-case,
+same as the `help` and `whatis` strings.  
 
-Let's tell modules to look for modules in this directory, and then test it can find the blast module:
+A copy of this modulefile is under `modulefiles/` in the current path.  
+
+Let's try it! First we need to tell modules to look for modules in this directory:
 
 ```
 $ module use $(pwd)/modulefiles
@@ -261,88 +272,63 @@ $ module avail
 {: .bash}
 
 ```
------------------------------------------------ /data/work/gitrepos/Trainings/singularity-containers/demos/wrap_blast/modulefiles ------------------------------------------------
-blast/2.9.0  
+------------------------------ /somewhere/demos/wrap_lolcow/modulefiles ------------------------------------
+lolcow/1.0.0  
 
-------------------------------------------------------------------------- /usr/share/modules/modulefiles -------------------------------------------------------------------------
+------------------------------ /usr/share/modules/modulefiles ---------------------------------------------
 dot  module-git  module-info  modules  null  use.own  
 
 ```
 {: .output}
 
-It's there!  Let's `load` it then:
+It's there!  Let's `load` it:
 
 ```
-$ module load blast/2.9.0
+$ module load lolcow/1.0.0
 ```
 {: .bash}
 
 Can we now see the wrappers in there?
 
 ```
-$ which blastp
+$ which cowsay
 ```
 {: .bash}
 
 ```
-/home/ubuntu/singularity-containers/demos/wrap_blast/apps/blast/2.9.0/bin/blastp
+/somewhere/demos/wrap_lolcow/apps/blast/1.0.0/bin/cowsay
 ```
 {: .output}
 
-Sure!  Let's test it with the usual `-help` flag:
+Sure! Let's test it with the usual `-h` flag:
 
 ```
-$ blastp -help
+$ cowsay -h
 ```
 {: .bash}
 
 ```
-USAGE
-  blastp [-h] [-help] [-import_search_strategy filename]
-[..]
- -use_sw_tback
-   Compute locally optimal Smith-Waterman alignments?
+cow{say,think} version 3.03, (c) 1999 Tony Monroe
+Usage: cowsay [-bdgpstwy] [-h] [-e eyes] [-f cowfile]
+          [-l] [-n] [-T tongue] [-W wrapcolumn] [message]
 ```
 {: .output}
 
-Containerised BLAST with wrappers and modules: the experience looks like a traditional installation!
+Containerised application with wrappers and modules: the experience looks like a traditional installation!
 
 
 ### Latest: SHPC, a tool to the rescue for container modules
 
-[Singularity Registry HPC, or SHPC in short,](https://singularity-hpc.readthedocs.io) is an extremely interesting project by some of the original creators of Singularity.  
-This utility enables the automatic deployment of so called Container Modules, using either Lmod or Environment Modules and a very similar approach to the one we have just presented in this episode.  The main difference is the usage of bash functions within modulefiles, in substitution for bash wrapper files.  
+[Singularity Registry HPC](https://singularity-hpc.readthedocs.io), or SHPC for short,
+is an extremely interesting project by some of the original creators of Singularity.  
+This utility enables the automatic deployment of so called Container Modules,
+using either Lmod or Environment Modules to provide access to bash wrappers.
+we have just presented in this episode.  
 
-To get an idea of what bash functions look like, let's reuse the BLAST example from the above and, rather than write a bash script, execute some commands (assuming we're still in the directory containing the BLAST container image):
-
-```
-$ image_dir="."
-$ image_name="blast_2.9.0--pl526h3066fca_4.sif"
-$ blastp() { singularity exec $image_dir/$image_name blastp "$@" ; }
-```
-{: .bash}
-
-The last command defines a bash function called `blastp`, that wraps the Singularity execution syntax, and which we can now use as a shell command:
-
-```
-$ blastp -help
-```
-{: .bash}
-
-```
-USAGE
-  blastp [-h] [-help] [-import_search_strategy filename]
-[..]
- -use_sw_tback
-   Compute locally optimal Smith-Waterman alignments?
-```
-{: .output}
-
-Among the differences with the wrapper script approach above, it's worth mentioning that bash function definitions do not require creating a file, and multiple definitions can fit within a single modulefile.  On the other hand, bash functions cannot be used as an argument for *mpirun* or *srun*, and hence are not usable for MPI applications.
-
-The key advantage of SHPC is that it automates the process of downloading the container and creating the corresponding modulefile with bash function definitions.  It does so by means of a registry of recipes (currently over 300) that are ready for use.  If a recipe for a container does not exist, writing one is relatively straightforward, although out of scope for this episode.
-
-Let's see how we can install BLAST using SHPC.  First, let's look for available BLAST versions with `shpc show`:
+This ever-growing repository of containerised applications already provides a number of
+Bioinformatics packages, which are typically run within containers. As an example,
+let's see how we can install [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
+using SHPC.  First, let's look for available BLAST versions with `shpc show`:
 
 ```
 $ shpc show --versions -f blast
@@ -359,7 +345,8 @@ ncbi/blast:latest
 ```
 {: .output}
 
-And now let's install the latest BLAST biocontainer (copy-pasting the image and tag from the output above) with `shpc install`:
+And now let's install the latest BLAST biocontainer (copy-pasting the image and
+tag from the output above) with `shpc install`:
 
 ```
 $ shpc install quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0
@@ -377,59 +364,16 @@ Module quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0 was created.
 ```
 {: .output}
 
-That's it!  We now have a BLAST module:
+That's it!  We now have a BLAST module that provides all the BLAST applications.
 
-```
-$ module avail blast
-```
-{: .bash}
+### Final thoughts on using wrappers
 
-```
+So, we've shown you how to effectively hide containers under the hood to
+provide a simplified user experience, while gaining in reproducibility,
+portability, productivity and more.
 
----------------------------------------------------------------------- /home/ubuntu/singularity-hpc/modules ----------------------------------------------------------------------
-   quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/module
-
-[..]
-```
-{: .output}
-
-Which we can load and use:
-
-```
-$ module load quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0
-$ blastp -help
-```
-{: .bash}
-
-```
-USAGE
-  blastp [-h] [-help] [-import_search_strategy filename]
-[..]
- -use_sw_tback
-   Compute locally optimal Smith-Waterman alignments?
-```
-{: .output}
-
-Finally, we can see that this command is indeed a bash function wrapping the singularity syntax, by using the Linux `type` command:
-
-```
-$ type blastp
-```
-{: .bash}
-
-```
-blastp is a function
-blastp ()
-{
-    singularity ${SINGULARITY_OPTS} exec ${SINGULARITY_COMMAND_OPTS} -B /home/ubuntu/singularity-hpc/modules/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/99-shpc.sh:/.singularity.d/env/99-shpc.sh /home/ubuntu/singularity-hpc/containers/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/quay.io-biocontainers-blast-2.12.0--pl5262h3289130_0-sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18.sif /usr/local/bin/blastp
-}
-```
-{: .output}
-
-
-### Final thoughts
-
-So, we've shown you how to effectively hide containers under the hood to provide a simplified user experience, while gaining in reproducibility, portability, productivity and more.
-
-Why bothering with learning the longer story of the Singularity syntax then?  Well, containers are a powerful technology, but also a complex one.  
-Even if you're going to use them through a friendlier interface, it's still crucial to know how thing work underneath, to be aware of the corresponding limitations, and possibly also to be able to fix the setup when things go wrong.
+Why bothering with learning the longer story of the Singularity syntax then?
+Well, containers are a powerful technology, but also a complex one.  
+Even if you're going to use them through a friendlier interface, it's still
+crucial to know how thing work underneath, to be aware of the corresponding
+limitations, and possibly also to be able to fix the setup when things go wrong.
