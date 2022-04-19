@@ -16,10 +16,12 @@ permalink: index.html  # Is the only page that don't follow the partner /:path/i
 ## Structure
 
 This tutorial has been designed in a modular way. Episodes can be thought as categorised as follows:
-* Getting Started (Core): eps. 1-3
-* Customising Containers: eps. 4-6
-* MPI containers and scaling to HPC: eps. 7-8
+* Getting started (Core): eps. 1-3
+* Customising containers: eps. 4-6
+* Best practices and making using containers easier: eps. 7-8
+* MPI containers and scaling to HPC: eps. 9
+* Python containers : eps. 10
 
-Once you've gone through Episodes 1-6, there are almost no further dependencies. You can go on and pick whichever you are interested in, and you will be able to follow through.
+Once you've gone through Episodes 1-7, there are almost no further dependencies. You can go on and pick whichever you are interested in, and you will be able to follow through.
 
 Like this tutorial?  **Star** it on [Github (button on top right)](https://github.com/pawseySC/hpc-container-training)!

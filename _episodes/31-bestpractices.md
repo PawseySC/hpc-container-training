@@ -15,7 +15,23 @@ keypoints:
 
 ### How to write maintanable recipes
 
-#### Adding Comments
+Always keep in mind that writing a Dockerfile is almost an art, which you can refine over time with practice.  Here we don't mean to be exhaustive; instead, we're providing some good practices to start with, with some Ubuntu/Debian examples where relevant.  These practices will then be applied to the examples further down.
+
+> ## Checklist for writing a recipe
+> 1. Document your dockerfile with labels and comments.
+> 2. When debugging use multiple `RUN` commands. When finalizing a recipe, condense separate `RUN` commands
+> into single or a few `RUN` commands to minimize image size once the recipe is working.
+> 3. Ensure any security information is ephemeral, that is used and the deleted within
+> a single `RUN` command.
+> 4. Clean the installation process, removing any build stages and caches.
+> 5. Abstract package versions, if you can
+> 6. Consider build reproducibility, if you can
+> 8. Consider adding runtime tests, if you can
+> 7. Know and set some useful environment variables
+{: .checklist}
+
+
+#### Adding comments
 
 Most examples of Docker recipes that you will find are not well documented, nor easily maintainable. Consider the previous recipe for the lolcow container:
 ```
@@ -102,7 +118,7 @@ RUN apt-get -y update && \
 ```
 {: .source}
 
-#### Ensuring  no security information present in container
+#### Ensuring no security information present in container
 
 Finally, for docker it is particularly important to ensure that security information,
 such as ssh keys, are used and then removed all within a single `RUN` command, otherwise,
@@ -133,16 +149,45 @@ RUN mkdir /root/.ssh/ \
 ```
 {: .source}
 
-> ## Checklist for writing a recipe
-> - Recipes should have useful comments, similar to how any other source code contains comments.
-> - Recipes should Have useful metadata, providing information for users of the container.
-> - When debugging use multiple `RUN` commands. Combine separate `RUN` commands
-> into single `RUN` command to minimize image size once the recipe is working.
-> - Ensure any security information is ephemeral, that is used and the deleted within
-> a single `RUN` command.
-{: .checklist}
 
-### Including tests in a container
+#### Ensuring reproducibility
+A big part of using containers is *runtime* reproducibility.
+
+However, it can be worth reflecting on *build time* reproducibility, too.
+In other words, if I re-run an image build with the same Dockerfile over time,
+am I getting the same image as output?  This can be important for an image curator,
+to be able to guarantee *to some extent* that the image they're build and shipping is the one they mean to.
+
+Consider:
+* relying on explicit versioning of the key packages in your image as much as possible.  
+This may include OS version, key library and key dependency versions, end-user
+application version (this latter is possibly obvious); typically this involves a
+trade-off between versioning too much and too little;
+* avoid generic package manager update commands, which make you lose control on versions.  
+In particular, you should avoid `apt-get upgrade`, `pip install --upgrade`, `conda update` and so on;
+* avoid downloading sources/binaries for `latest` versions, specify the version number instead.
+
+#### Using environment variables
+Dockerfile installations are non-interactive by nature, *i.e.* no installer can ask you questions during the process.
+In Ubuntu/Debian, you can define a variable prior to running any `apt` command,
+that informs a shell in Ubuntu or Debian that you are not able to interact, so that no questions will be asked:
+
+```
+ENV DEBIAN_FRONTEND="noninteractive"
+```
+{: .source}
+
+Another pair of useful variables, again to be put at the beginning of the Dockerfile, are:
+
+```
+ENV LANG="C.UTF-8" LC_ALL="C.UTF-8"
+```
+{: .source}
+
+These variables are used to specify the language localisation, or *locale*, to the value `C.UTF-8` in this case.  
+Leaving this undefined can result, for some programs, in warnings or even in unintended behaviours (both at build and run time).
+
+#### Including runtime tests
 
 Although not all containers make use of external libraries for functionality or performance,
 there are a number of uses cases where it is very useful to provide separate tests within a container.
@@ -193,6 +238,13 @@ RUN mkdir -p /tmp/openmpi-build \
 ```
 {: .docker}
 
+> ## Using abstraction and specific versions
+> In the above example, we have use of explicit versions to ensure **build-time**
+> reproducibility, abstracting away versions so that future builds can just use the same
+> recipe but provide the appropriate arguments to use newer versions of the OpenMPI library and
+> OSU application.
+{: .callout }
+
 The approach of having a simple test related to any Parallel API contained within the container
 may reduce the number of issues you will encounter deploying containers on a variety of systems.
 It also maybe useful to even add a script that reports the libraries used by containerized
@@ -221,6 +273,10 @@ RUN cp -p ${LDD_SCRIPT} /usr/bin/applications-dependency-check \
 ```
 {: .docker}
 
+The Docker instruction `CMD` can be used to set the default command that gets executed
+by `docker run <IMAGE>` (without arguments) or `singularity run <IMAGE>`. If you don't specify it,
+the default will be the `CMD` specified by the base image, or the shell if the latter was not defined.
+Such a script may even be a useful default command.
 
 ### Portability vs Performance
 
