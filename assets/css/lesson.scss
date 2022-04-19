@@ -45,12 +45,14 @@ $color-testimonial: #fc8dc1 !default;
 .python, .language-python { @include cdSetup($color-source); }
 .r, .language-r           { @include cdSetup($color-source); }
 .sql, .langauge-sql       { @include cdSetup($color-source); }
+.docker                   { @include cdSetup($color-source); }
 
 .error pre,
 .output pre,
 .source pre,
 .bash pre,
 .language-bash pre,
+.docker pre,
 .make pre,
 .language-make pre,
 .matlab pre,
