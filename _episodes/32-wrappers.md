@@ -28,21 +28,21 @@ Once the container image is available in the local disk, in the vast majority of
 cases you'll use it to execute some command in this way.
 As a practical example, let's grab the `lolcow` container used in earlier episodes.
 
-```
+```bash
 singularity exec ./lolcow.sif <CMD> <ARGS>
 ```
 {: .source}
 
 As a plain, useful example, let's suppose we want to get the help output from the `cowsay` command:
 
-```
+```bash
 $ singularity exec ./lolcow.sif cowsay -h
 ```
-{: .bash}
+{: .source}
 
 We can break this into logical parts; let's write a script called `cowsay.1` for convenience:
 
-```
+```bash
 #!/bin/bash
 
 # point to the image directory
@@ -69,11 +69,11 @@ assign to `$@` the full list of arguments that you append to the script in the c
 
 To see this in practice,make the `cowsay.1` script executable (using `chmod`) and run it with the `-h` argument:
 
-```
+```bash
 $ chmod +x cowsay.1
 $ ./cowsay.1 -h
 ```
-{: .bash}
+{: .source}
 
 ```
 cow{say,think} version 3.03, (c) 1999 Tony Monroe
@@ -85,7 +85,7 @@ Usage: cowsay [-bdgpstwy] [-h] [-e eyes] [-f cowfile]
 The generality of the wrapper script means that to write a script for the command
 `lolcat`, we need only change that line:
 
-```
+```bash
 #!/bin/bash
 
 image_dir="."
@@ -104,10 +104,10 @@ From the output, you can see that the `cowsay` command actually got the `-h` fla
 
 So to summarise this section, we've written a simple bash script that wraps around the Singularity `exec` approach, so that to run `cowsay` from a container you simply type:
 
-```
+```bash
 $ ./cowsay.1 <ARGS>
 ```
-{: .bash}
+{: .source}
 
 Why the `.1` extension?  Well, this is just because the story is not over...
 
@@ -124,7 +124,7 @@ going to use the bash variable `$0`; used inside a script, it contains the full
 path of the script itself; we're also using the bash command `basename`, that
 extract a file or directory name out of its full path.  The `cmd` variable becomes:
 
-```
+```bash
 cmd="$(basename $0)"
 ```
 {: .source}
@@ -134,14 +134,14 @@ wrappers in the same directory where the image is located. Then, we can use the
 bash command `dirname` to extract the location of a file or directory out of its
 full path. The `image_dir` variable becomes:
 
-```
+```bash
 image_dir="$(dirname $0)"
 ```
 {: .source}
 
 So we can now have a general bash wrapper for the commands from the container image `lolcow.sif`:
 
-```
+```bash
 #!/bin/bash
 
 image_dir="$(dirname $0)"
@@ -158,27 +158,27 @@ singularity exec $image_dir/$image_name $cmd $args
 To create a wrapper for `cowsay`, all we have to do is to create a script named
 `cowsay` with that content.  Then, we can do the same for any other commands such as
 `fortune`, `lolcat`, and so on. In fact, we need not even create files for each
-command. Instead we create a single script, *e.g.* named `lolcow_commands.sh`, and
+command. Instead we create a single script, *e.g.* named `.lolcow_commands.sh`, and
 then create appropriately named symbolic links for the commands, for instance:
 
+```bash
+$ ln -s .lolcow_commands.sh cowsay
+$ ln -s .lolcow_commands.sh lolcat
 ```
-$ ln -s lolcow_commands.sh cowsay
-$ ln -s lolcow_commands.sh lolcat
-```
-{: .bash}
+{: .source}
 
 ### How general is this approach?
 
 Well, quite general probably. It can be used every time you would use containers with this Singularity syntax:
 
-```
+```bash
 singularity exec <IMAGE> <CMD> <ARGS>
 ```
 {: .source}
 
 This will also work with MPI containers and Slurm, as the corresponding syntax does not impact such form:
 
-```
+```bash
 mpirun -n <NNODES> singularity exec <IMAGE> <CMD> <ARGS>
 srun singularity exec <IMAGE> <CMD> <ARGS>
 ```
@@ -197,7 +197,7 @@ Of course there are some corner cases:
 > to define the maximal required paths prior to execution of the application.  
 > If you have a standard setup on your system, where all the data go under the
 > same parent directory (*e.g.* `/data`), you might even want to define the
-> variable in the startup scripts (`~/.bashrc`,...).  This can be quite a good
+> variable in the startup scripts (`~/.sourcerc`,...).  This can be quite a good
 > practice in simplifying your production environment, and making it more robust.  
 >
 > The singularity module provided on Pawsey HPC systems adds `/group` and `/scratch`
@@ -223,10 +223,10 @@ using them to show how to organise containerised applications.
 
 All relevant bash wrapper scripts for our containerised application, *e.g.* are in a single location. To run this example, there's already a directory made ready in your current work directory, `$TUTO/demos/wrap_container`, namely `apps/lolcow/1.0.0/bin`. It contains four bash wrappers:
 
-```
+```bash
 $ ls apps/lolcow/1.0/bin
 ```
-{: .bash}
+{: .source}
 
 ```
 cowsay     fortune     lolcat     lolcow
@@ -235,14 +235,14 @@ cowsay     fortune     lolcat     lolcow
 
 To get ready for this example, let us also pull the BLAST image there:
 
-```
+```bash
 $ singularity pull --dir apps/lolcow/1.0.0/bin ???
 ```
-{: .bash}
+{: .source}
 
 Now, we can think of a minimal modulefile to setup `lolcow` in our environment:
 
-```
+```tcl
 #%Module1.0######################################################################
 ##
 ## blast modulefile
@@ -265,11 +265,11 @@ A copy of this modulefile is under `modulefiles/` in the current path.
 
 Let's try it! First we need to tell modules to look for modules in this directory:
 
-```
+```bash
 $ module use $(pwd)/modulefiles
 $ module avail
 ```
-{: .bash}
+{: .source}
 
 ```
 ------------------------------ /somewhere/demos/wrap_lolcow/modulefiles ------------------------------------
@@ -283,17 +283,17 @@ dot  module-git  module-info  modules  null  use.own
 
 It's there!  Let's `load` it:
 
-```
+```bash
 $ module load lolcow/1.0.0
 ```
-{: .bash}
+{: .source}
 
 Can we now see the wrappers in there?
 
-```
+```bash
 $ which cowsay
 ```
-{: .bash}
+{: .source}
 
 ```
 /somewhere/demos/wrap_lolcow/apps/blast/1.0.0/bin/cowsay
@@ -302,10 +302,10 @@ $ which cowsay
 
 Sure! Let's test it with the usual `-h` flag:
 
-```
+```bash
 $ cowsay -h
 ```
-{: .bash}
+{: .source}
 
 ```
 cow{say,think} version 3.03, (c) 1999 Tony Monroe
@@ -330,10 +330,10 @@ Bioinformatics packages, which are typically run within containers. As an exampl
 let's see how we can install [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
 using SHPC.  First, let's look for available BLAST versions with `shpc show`:
 
-```
+```bash
 $ shpc show --versions -f blast
 ```
-{: .bash}
+{: .source}
 
 ```
 quay.io/biocontainers/blast:2.10.1--pl526he19e7b1_3
@@ -348,10 +348,10 @@ ncbi/blast:latest
 And now let's install the latest BLAST biocontainer (copy-pasting the image and
 tag from the output above) with `shpc install`:
 
-```
+```bash
 $ shpc install quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0
 ```
-{: .bash}
+{: .source}
 
 ```
 singularity pull --name /home/ubuntu/singularity-hpc/containers/quay.io/biocontainers/blast/2.12.0--pl5262h3289130_0/quay.io-biocontainers-blast-2.12.0--pl5262h3289130_0-sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18.sif docker://quay.io/biocontainers/blast@sha256:a7eb056f5ca6a32551bf9f87b6b15acc45598cfef39bffdd672f59da3847cd18

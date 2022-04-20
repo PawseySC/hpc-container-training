@@ -19,32 +19,32 @@ We're going to start this episode with actually running a practical example, and
 
 First, cd into a demo directory and download the OpenFoam (computational fluid dynamics simulation code) container image from [quay.io](https://quay.io/repository/pawsey/openfoam?tab=info):
 
-```
+```bash
 $ cd $TUTO/demo/openfoam/
 $ singularity pull docker pull quay.io/pawsey/openfoam
 ```
-{: .bash}
+{: .source}
 
 Now, let us run the sample simulation. OpenFoam first generates initial conditions in serial and then runs a simulation with MPI. A sample script for running the container is provided in the demo directory (to directly copy the script without cloning this tutorial repo, copy [this file](https://github.com/PawseySC/hpc-container-training/blob/gh-pages/demos/openfoam/mpi_mpirun.sh)). Run the script:
 
-```
+```bash
 $ ./mpi_mpirun.sh
 ```
-{: .bash}
+{: .source}
 
 **Alternatively**, if you're running this example on Pawsey systems (*e.g.* Magnus or Zeus), achieve the same result by using the Slurm scheduler to submit the job script `mpi_slurm.sh`:
 
-```
+```bash
 $ sbatch mpi_slurm.sh
 ```
-{: .bash}
+{: .source}
 
 The run will take a couple of minutes. When it's finished, the directory contents will look a bit like this one:
 
-```
+```bash
 $ ls -ltr
 ```
-{: .bash}
+{: .source}
 
 ```
 total 80
@@ -76,14 +76,14 @@ What has just happened?
 
 Let's get back to the directory path for the first example:
 
-```
+```bash
 $ cd $TUTO/demos/openfoam
 ```
-{: .bash}
+{: .source}
 
 and have a look at the content of the script `mpi_mpirun.sh`:
 
-```
+```bash
 #!/bin/bash
 
 NTASKS="2"
@@ -116,7 +116,7 @@ mpirun -n $NTASKS \
 singularity exec openfoam_v2012.sif \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
 ```
-{: .bash}
+{: .source}
 
 
 ### How does Singularity interplay with the MPI launcher?
@@ -125,19 +125,19 @@ We'll comment on the environment variable definitions soon, now let's focus on t
 
 In particular, the fourth command is the only one using multiple processors through MPI:
 
-```
+```bash
 mpirun -n $NTASKS \
   singularity exec openfoam_v2012.sif \
   simpleFoam -fileHandler uncollated -parallel | tee log.simpleFoam
 ```
-{: .bash}
+{: .source}
 
 Here, `mpirun` is the MPI launcher, *i.e.* the tool that is in charge for spawning the multiple MPI processes that will make the workflow run in parallel.  
 Note how `singularity` can be executed through the launcher as any other application would.
 
 Similarly, for running MPI applications through Slurm, the `srun` command is used in `mpi_slurm.sh`:
 
-```
+```bash
 #!/bin/bash -l
 
 #SBATCH --job-name=mpi
@@ -175,7 +175,7 @@ srun -n 1 \
   singularity exec $image \
   reconstructPar -latestTime -fileHandler uncollated | tee log.reconstructPar
 ```
-{: .bash}
+{: .source}
 
 Under the hood, the MPI processes outside of the container (spawned by `mpirun` or `srun`) will work in tandem with the containerized MPI code to instantiate the job.  
 There are a few implications here ...
@@ -189,7 +189,7 @@ Let's discuss what the above mentioned implications are.
 
 A specific section of the recipe file needs to take care of this, or in alternative the base image for the recipe needs to have the MPI libraries.  Either way, if we take the example of a *def file* for the *MPICH* flavour of MPI, the code would look like:
 
-```
+```bash
 %post
 
 [..]
@@ -213,7 +213,7 @@ ldconfig
 
 [..]
 ```
-{: .bash}
+{: .source}
 
 
 > ## Base MPI image at Pawsey
@@ -235,13 +235,13 @@ At present, there are just two families of MPI implementations not ABI compatibl
 
 * Bind mounts and environment variables need to be setup so that the containerised MPI application can use the host MPI libraries at runtime. Bind mounts can be configured by the administrators, or set up through variables. We're discussing the latter way here. The current example script has:
 
-```
+```bash
 export MPICH_ROOT="/opt/mpich/mpich-3.1.4/apps"
 
 export SINGULARITY_BINDPATH="$MPICH_ROOT"
 export SINGULARITYENV_LD_LIBRARY_PATH="$MPICH_ROOT/lib:\$LD_LIBRARY_PATH"
 ```
-{: .bash}
+{: .source}
 
 Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installation is (MPICH in this case).  The second variable, `SINGULARITYENV_LD_LIBRARY_PATH`, ensures that at runtime the container's `LD_LIBRARY_PATH` has the path to the MPICH libraries.
 
@@ -255,10 +255,10 @@ Here, `SINGULARITY_BINDPATH` bind mounts the host path where the MPI installatio
 >
 > In all Pawsey systems, the Singularity module sets up all of the required variables for MPI and interconnect libraries.  So this will do the job:
 >
-> ```
+> ```bash
 > $ module load singularity
 > ```
-> {: .bash}
+> {: .source}
 {: .callout}
 
 
