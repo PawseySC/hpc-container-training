@@ -1,5 +1,5 @@
 ---
-title: "Building Images with Singularity"
+title: "Building images with Singularity"
 teaching: 15
 exercises: 5
 questions:
@@ -19,7 +19,7 @@ keypoints:
 > We therefore recommand familiarizing yourself with Dockerfile syntax rather than
 > the recipe syntax used by Singularity. Only proceed if you know that you will
 > be building container images using singularity rather than building with docker
-> and using `singularity pull` from a docker repository to generate a SIF file. 
+> and using `singularity pull` from a docker repository to generate a SIF file.
 {: .prereq}
 
 ### What is a def file?
