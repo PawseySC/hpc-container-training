@@ -1,17 +1,19 @@
 ---
 title: "Basics of Singularity"
-teaching: 15
+teaching: 20
 exercises: 10
 questions:
 objectives:
 - Download container images
 - Run commands from inside a container
 - Discuss what are the most popular image registries
+- Discuss how environment variables can be provide to containerized applications
 keypoints:
 - Singularity can run both Singularity and Docker container images
 - Execute commands in containers with `singularity exec`
 - Open a shell in a container with `singularity shell`
 - Download a container image in a selected location with `singularity pull`
+- Use `SINGULARITYENV_` and `SINGULARITY_BINDPATH` to setup desired runtime environment
 - You should not use the `latest` tag, as it may limit workflow reproducibility
 - The most commonly used registries are Docker Hub, Red Hat Quay and BioContainers
 ---
@@ -88,8 +90,11 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `16.04
 {: .callout}
 
 
-Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<project>/<name>:<tag>`.  
-In the example above we didn't specify the **user**, `library`, and the **project**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
+Here Singularity pulled the image from an online image registry, as represented
+in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).
+Images in there are organised as: `<user>/<project>/<name>:<tag>`.  In the example
+above we didn't specify the **user**, `library`, and the **project**, `default`.  
+Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
 ```bash
 $ singularity exec library://library/default/ubuntu:16.04 echo "Hello World"
@@ -103,11 +108,11 @@ Hello World
 
 Here we are also experiencing image caching in action: the output has no more mention of the image being downloaded.
 
-
 ### Executing a command in a Docker container
 
 Interestingly, Singularity is able to download and run Docker images as well.  
-Let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
+Let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com),
+*i.e.* the main registry for Docker containers:
 
 ```bash
 $ singularity exec docker://ubuntu:16.04 cat /etc/os-release
@@ -147,14 +152,16 @@ UBUNTU_CODENAME=xenial
 ```
 {: .output}
 
-Rather than just downloading a SIF file, now there's more work for Singularity, as it has to both:
-
+Rather than just downloading a SIF file, now there's more work for Singularity,
+as it has to both:
 * download the various layers making up the image, and
 * assemble them into a single SIF image file.
 
 Note that, to point Singularity to Docker Hub, the prefix `docker://` is required.
 
-Docker Hub organises images only by users (also called *repositories*), not by projects: `<repository>/<name>:<tag>`.  In the case of the Ubuntu image, the repository was `library` and could be omitted.
+Docker Hub organises images only by users (also called *repositories*), not by
+projects: `<repository>/<name>:<tag>`.  In the case of the Ubuntu image, the
+repository was `library` and could be omitted.
 
 
 > ## What is the *latest* Ubuntu image from Docker Hub?
@@ -316,6 +323,214 @@ If we really wanted to wipe the cache, we would need to use the `-f` flag instea
 {: .callout}
 
 
+### Files inside a container
+
+What directories and files can we access from the container? First, let us assess
+what the content of the root directory `/` looks like from outside *vs* inside the container,
+to highlight the fact that a container runs on its own filesystem:
+
+From a host system:
+```bash
+$ ls /
+```
+{: .bash}
+
+```
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  scratch  shared  srv  sys  tmp  usr  var
+```
+{: .output}
+
+Inside a container:
+
+```bash
+$ singularity exec docker://ubuntu:18.04 ls /
+```
+{: .bash}
+
+```
+bin  boot  data  dev  environment  etc	home  lib  lib64  media  mnt  opt  proc  root  run  sbin  singularity  srv  sys  tmp  usr  var
+```
+{: .output}
+
+
+> ## In which directory is the container running?
+> The question that naturally occurs is what host directories are automatically bind
+> mounted if any? Let's find out.
+> ```bash
+> $ mkdir -p $TUTO/foo
+> $ cd $TUTO/foo
+> $ pwd
+> ```
+> {: .source}
+> ```
+> /home/ubuntu/hpc-container-training/foo
+> ```
+> {: .output}
+> Now inspect the container.  (**Hint**: you need to run `pwd` in the container)
+> > ## Solution
+> > ```bash
+> > $ singularity exec docker://ubuntu:18.04 pwd
+> > ```
+> > {: .source}
+> > ```
+> > /home/ubuntu/hpc-container-training/foo
+> > ```
+> > {: .output}
+> > The current working directory from where singularity is launched is
+> > always bind mounted.
+> {: .solution}
+{: .challenge}
+
+> ## How about other directories in the host?
+>
+> For instance, let us inspect `$TUTO/_episodes`.
+>
+> > ## Solution
+> >
+> > ```
+> > $ singularity exec docker://ubuntu:18.04 ls $TUTO/_episodes
+> > ```
+> > {: .bash}
+> >
+> > ```
+> > ls: cannot access '/home/ubuntu/hpc-containers/_episodes': No such file or directory
+> > ```
+> > {: .output}
+> >
+> > Host directories external to the current directory are not visible!  How can we fix this?  Read on...
+> {: .solution}
+{: .challenge}
+
+### Bind mounting host directories
+
+Singularity has the runtime flag `--bind`, `-B` in short, to mount host directories.
+
+There is a long syntax, which allows to map the host dir onto a container dir with
+a different name/path, `-B hostdir:containerdir`.  
+There is also a short syntax, that just mounts the dir
+using the same name and path: `-B hostdir`.
+
+Let's use the latter syntax to mount `$TUTO` into the container and re-run `ls`.
+
+```bash
+$ singularity exec -B $TUTO docker://ubuntu:18.04 ls -Fh $TUTO/assets
+```
+{: .source}
+
+```
+css/   fonts/ img/   js/
+```
+{: .output}
+
+Also, we can write files in a host dir which has been bind mounted in the container:
+
+```bash
+$ singularity exec -B $TUTO docker://ubuntu:18.04 touch $TUTO/my_example_file
+$ ls my_example_file
+```
+{: .source}
+
+```
+my_example_file
+```
+{: .output}
+
+If you need to mount multiple directories, you can either repeat the `-B` flag multiple times, or use a comma-separated list of paths, *i.e.*
+
+```bash
+singularity -B dir1,dir2,dir3 ...
+```
+{: .source}
+
+Equivalently, directories to be bind mounted can be specified using the environment variable `SINGULARITY_BINDPATH`:
+
+```bash
+$ export SINGULARITY_BINDPATH="dir1,dir2,dir3"
+```
+{: .source}
+
+> ## Mounting `$HOME`
+>
+> Depending on the site configuration of Singularity, user home directories might
+> or might not be mounted into containers by default.  
+> We do recommend that you **avoid mounting home** whenever possible, to avoid
+> sharing potentially sensitive data, such as SSH keys, with the container, especially if exposing it to the public through a web service.
+>
+> If you need to share data inside the container home, you might just mount that specific file/directory, *e.g.*
+>
+> ```bash
+> -B $HOME/.local
+> ```
+> {: .source}
+>
+> Or, if you want a full fledged home, you might define an alternative host directory to act as your container home, as in
+>
+> ```bash
+> -B /path/to/fake/home:$HOME
+> ```
+> {: .source}
+>
+> Finally, you should also **avoid running a container from your host home**,
+otherwise this will be bind mounted as it is the current working directory.
+{: .callout}
+
+### How about sharing environment variables with the host?
+
+By default, shell variables are inherited in the container from the host:
+
+```bash
+$ export HELLO=world
+$ singularity exec docker://ubuntu:18.04 bash -c 'echo $HELLO'
+```
+{: .source}
+
+```
+world
+```
+{: .output}
+
+There might be situations where you want to isolate the shell environment of the container; to this end you can use the flag `-C`, or `--containall`:  
+(Note that this will also isolate system directories such as `/tmp`, `/dev` and `/run`)
+
+```bash
+$ export HELLO=world
+$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $HELLO'
+```
+{: .source}
+
+```
+
+```
+{: .output}
+
+If you need to pass only specific variables to the container, that might or might
+not be defined in the host, you can define variables that start with `SINGULARITYENV_`;
+this prefix will be automatically trimmed in the container:
+
+```bash
+$ export SINGULARITYENV_CIAO=mondo
+$ singularity exec -C docker://ubuntu:18.04 bash -c 'echo $CIAO'
+```
+{: .source}
+
+```
+mondo
+```
+{: .output}
+
+An alternative way to define variables is to use the flag `--env`:
+
+```bash
+$ singularity exec --env CIAO=mondo docker://ubuntu:18.04 bash -c 'echo $CIAO'
+```
+{: .source}
+
+```
+mondo
+```
+{: .output}
+
+
 ### Popular registries (*aka* image libraries)
 
 At the time of writing, **Docker Hub** hosts a much wider selection of container images than **Sylabs Cloud**.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
@@ -327,33 +542,3 @@ Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting a
 AMD has recently created [AMD Infinity Hub](https://www.amd.com/en/technologies/infinity-hub), to host containerised applications optimised for AMD GPUs.
 
 Right now, the Sylabs Cloud Library does not contain a large number of images.  Still, it can turn useful for storing container images requiring features that are specific to Singularity (we will see some in the next episodes).
-
-
-> ## Pull and run a Python container ##
->
-> How would you pull the following container image from Docker Hub, `python:3-slim`?
->
-> Once you've pulled it, enquire the Python version inside the container by running `python --version`.
->
-> > ## Solution
-> >
-> > Pull:
-> >
-> > ```bash
-> > $ singularity pull docker://python:3-slim
-> > ```
-> > {: .source}
-> >
-> > Get Python version:
-> >
-> > ```bash
-> > $ singularity exec ./python_3-slim.sif python --version
-> > ```
-> > {: .source}
-> >
-> > ```
-> > Python 3.8.0
-> > ```
-> > {: .output}
-> {: .solution}
-{: .challenge}

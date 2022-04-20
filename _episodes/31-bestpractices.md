@@ -1,13 +1,14 @@
 ---
 title: "Best Practices"
 teaching: 15
-exercises: 0
+exercises: 10
 questions:
 objectives:
 - Discuss the best practices when debugging and finalising container recipes
 - Discuss any security issues that may arise in the build process
 - Discuss how to design containers to contain simple in-built tests
 - Discuss how containers can be built to be portable or performant and when to choice portability or performance
+- Discuss how best to run singularity
 keypoints:
 - Add lots of comments and metadata to your recipe so that it is easier to maintain
 - When possible include tests of any Parallel API the container may need to use
@@ -58,7 +59,7 @@ For one, it should have a extensive set of labels:
 LABEL maintainer="Aardvark"
 LABEL version="1.0.0"
 LABEL tags="ubuntu/18.04"
-LABEL description="This container provides the fortune, cowsay and lolcat commands.\
+LABEL description="This container provides the fortune, cowsay and lolcat commands. \
 It will by default combine all these commands, piping the output from fortune to cowsay and \
 add colour via lolcat. "
 ```
@@ -110,9 +111,9 @@ once they have been used.
 ```docker
 # Use apt-get to install desired packages
 RUN apt-get -y update && \
-  # install packages
+  # install packages \
   apt-get -y install fortune cowsay lolcat \
-  # and clean-up apt-get related files
+  # and clean-up apt-get related files \
   && apt-get clean all \
   && rm -r /var/lib/apt/lists/*
 ```
@@ -140,11 +141,11 @@ Instead, it is critical that such sensitive information be limited to a single `
 and removed once used.
 ```docker
 RUN mkdir /root/.ssh/ \
-    # Copy ssh information within a run command
+    # Copy ssh information within a run command \
     && cp ${SSH_KEY_PATH}/id_rsa /root/.ssh/id_rsa \
     && cp ${SSH_KEY_PATH}/known_hosts /root/.ssh/known_hosts \
-    # Run other commands
-    # Remove SSH key so that layer does not contain any security information
+    # Run other commands \
+    # Remove SSH key so that layer does not contain any security information \
     && rm -rf /root/.ssh/*
 ```
 {: .source}
@@ -252,7 +253,7 @@ applications at runtime:
 ```bash
 #!/bin/bash
 # list all applications of interest as space separated list
-apps=()
+apps=(...)
 # loop over all apps and report there dependencies
 echo "Checking the runtime libraries used by :"
 echo ${apps[@]}
@@ -265,11 +266,13 @@ done
 ```
 {: .source}
 and have this script in `/usr/bin/applications-dependency-check`:
+
 ```docker
 # add ldd script
-ARG LDD_SCRIPT
+ARG LDD_SCRIPT=./applications-dependency-check
 RUN cp -p ${LDD_SCRIPT} /usr/bin/applications-dependency-check \
       && chmod +x /usr/bin/applications-dependency-check
+CMD /usr/bin/applications-dependency-check
 ```
 {: .source}
 
@@ -303,9 +306,9 @@ defined portable and performant containers:
 > LABEL build.options=${OPTIMIZATION_FLAGS}
 >
 > RUN mkdir -p /tmp/build \
->       # get the source
+>       # get the source \
 >       && wget ${source}.tar.gz && tar xzf ${source}.tar.gz && cd ${source} \
->       # build
+>       # build \
 >       && make CXXFLAGS=${OPTIMIZATION_FLAGS} && make install \
 >       && rm -rf /tmp/build
 > ```
@@ -322,9 +325,9 @@ defined portable and performant containers:
 > LABEL build.options=${OPTIMIZATION_FLAGS}
 >
 > RUN mkdir -p /tmp/build \
->       # get the source
+>       # get the source \
 >       && wget ${source}.tar.gz && tar xzf ${source}.tar.gz && cd ${source} \
->       # build
+>       # build \
 >       && make CXXFLAGS=${OPTIMIZATION_FLAGS} && make install \
 >       && rm -rf /tmp/build
 > ```
@@ -333,3 +336,49 @@ defined portable and performant containers:
 
 You'll notice subtle differences in the `RUN` commands but that we have added metadata
 to make it clear what the difference between these containers.
+
+### Running Singularity in an HPC setting
+
+In most HPC environments, you will be running a scratch filesystem and may **NOT** want
+to mount `$HOME` when running a container. You may also encounter issues with filesystem quotas
+if the containerized application produces many small files. In such cases, it is
+best to be selective in the output that will be written to the host bind mounted directories.
+
+> ## Example of bind mounting directories
+> For example, the workflow running in the container might make extensive use of `$HOME/.local/` directory,
+> write large number of files to a `$HOME/output/` directory which are not needed after post processing,
+> , and write final post-processed files to a `$HOME/postprocess/`.
+> How do you run singularity?
+> > ## Solution
+> > ```bash
+> > singularity exec -B /path/to/fake/home/local:$HOME/.local,/path/to/tmp/output:$HOME/output,/path/to/save/:$HOME/postprocess ...
+> > ```
+> > {: .source}
+> {: .solution}
+{: .challenge}
+
+It may also be desireable to make use of the optimised libraries present on the host
+system rather than those used within the container itself.
+> ## Example of setting up environment variables
+> The workflow running in the container might make use of slurm variables, such as job ID
+> to write unique file names, or could use a host optimised library.
+> How do you run singularity?
+> > ## Solution
+> > ```bash
+> > export SINGULARITYENV_LD_LIBRARY_PATH=/path/to/desired/library/:$LD_LIBRARY_PATH
+> > export SINGULARITYENV_JOBID=${SLURM_JOB_ID}
+> > singularity exec ...
+> > ```
+> > {: .source}
+> {: .solution}
+{: .challenge}
+
+> ## What happens on Pawsey HPC systems?
+>  
+> Pawsey has setup the singularity module to make users' life easier. In particular,
+> key filesystemsm such as `/scratch` and `/group`, get bind mounted by default.  
+> Pawsey also sets the `SINGULARITYENV_LD_LIBRARY_PATH` so that containers can
+> make use of optimised libraries without much hassle.
+> If you want to experience this example on Pawsey HPC, you should first `unset SINGULARITY_BINDPATH`
+> or `unset SINGULARITYENV_LD_LIBRARY_PATH`.
+{: .callout}

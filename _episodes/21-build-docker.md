@@ -4,7 +4,7 @@ teaching: 15
 exercises: 5
 questions:
 objectives:
-- Discuss the pros&cons of building with Singularity vs Docker
+- Discuss the pros & cons of building with Singularity vs Docker
 - Learn the basic syntax of a Dockerfile
 - Build and share an image with Docker
 - Convert a Docker image into the Singularity format
@@ -23,30 +23,29 @@ keypoints:
 
 Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
 
-At present, both tools, Docker and Singulairty (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
+At present, both tools, Docker and Singularity (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
 
-#### Singularity
-* Single file image, can be handled as any other file and shared easily;
-* Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications);
-* Powerful ways of defining shell environment (see [Singularity docs on Environment and Metadata](https://singularity.hpcng.org/user-docs/3.5/environment_and_metadata.html));
-* Ability to sign/verify images for improved security.
+> ## Advantages of each container engine
+> #### Docker
+> * Image format can be run by all existing container engines, including Singularity.
+> * Docker uses Layered image format compliant with the *Open Containers Initiative* (OCI) allows caching, for reduced build time during prototyping
+> and development.
+>   * Each build command in the recipe file results in the creation of a distinct image layer,
+> which are cached during the build process. Repeated build attempts that use the same layers will exploit the cache
+> reducing the overall build time and aiding debugging.
+>   * A drawback to this approach is shipping a container image is not straightforward
+> and requires either relying on a public registry, or compressing the image in a *tar* archive.
+>
+> #### Singularity
+> * Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications).
+> * Powerful ways of defining shell environment (see [Singularity docs on Environment and Metadata](https://singularity.hpcng.org/user-docs/3.5/environment_and_metadata.html));
+> * Ability to sign/verify images for improved security.
+> * *Singularity Image Format* (SIF) is a single file layout for container images that can be handled as any other file and shared easily.
+>   * Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  
+>   * A drawback of this approach is that during build time a progressive, incremental approach is not possible as it is with Docker.
+{: .discussion}
 
-#### Docker
-* Compatibility: image format can be run by all existing container engines, including Singularity;
-* Layered image format allows caching, for reduced build time during prototyping and development.
-
-Although Singularity builds offer some interesting advantages, there's a single item that right now makes using Docker preferred in most situations due to its ability to layered format and critically, its **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
-
-### Container image formats
-
-One of the differences between Docker and Singularity is the adopted format to store container images.
-
-Docker adopts a layered format compliant with the *Open Containers Initiative* (OCI).  Each build command in the recipe file results in the creation of a distinct image layer.  These layers are cached during the build process, making them quite useful for development.  In fact, repeated build attempts that make use of the same layers will exploit the cache, thus reducing the overall build time.  On the other hand, shipping a container image is not straightforward, and requires either relying on a public registry, or compressing the image in a *tar* archive.
-
-Since version 3.0, Singularity has developed the *Singularity Image Format* (SIF), a single file layout for container images, with extension `.sif`.  Among the benefits, an image is simply a very large file, and thus can be transferred and shipped as any other file.  Building on this single file format, a number of features have been developed, such as image signing and verification, and (more recently) image encryption.  A drawback of this approach is that during build time a progressive, incremental approach is not possible.
-
-Note that Singularity versions prior to 3.0 used different image formats, characterised by the extensions `.simg` or `.sqsh`.  You can still find these around in the web; newer Singularity versions are still able to run them.
-
+Docker is preferred in most situations due to its ability to layered format and critically, its **compatibility**.  Build with Docker, and you'll know the resulting image can be run from every container engine anywhere in the world.
 
 ### Building the container image with Docker
 
@@ -57,7 +56,8 @@ $ cd $TUTO/demos/lolcow_docker
 ```
 {: .source}
 
-Let us also start building the image with `docker build` straight away.  Meanwhile, we'll bring the discussion on.
+Let us also start building the image with `docker build` straight away while we progress
+through the material.
 
 ```bash
 $ sudo docker build -t lolcow:1Nov19 .
