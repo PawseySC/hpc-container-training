@@ -96,14 +96,13 @@ Before we start, let us ensure we have got the required files to run the tutoria
 
 If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
 
-```
+```bash
 $ cd ~
 $ git clone https://github.com/PawseySC/hpc-container-training
 $ cd singularity-containers
 $ export TUTO=$(pwd)
 ```
-{: .bash}
-
+{: .source}
 
 > ## Want to save time later in the tutorial?
 >

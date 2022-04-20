@@ -43,17 +43,17 @@ For these first exercises, we're going to use a plain *Ubuntu* container image. 
 
 Within the tutorial directory, let us cd into `demos/singularity`:
 
-```
+```bash
 $ cd $TUTO/demos/singularity
 ```
-{: .bash}
+{: .source}
 
 Running a command is done by means of `singularity exec`:
 
-```
+```bash
 $ singularity exec library://ubuntu:16.04 cat /etc/os-release
 ```
-{: .bash}
+{: .source}
 
 ```
 INFO:    Downloading library image
@@ -91,10 +91,10 @@ Container images have a **name** and a **tag**, in this case `ubuntu` and `16.04
 Here Singularity pulled the image from an online image registry, as represented in this example by the prefix `library://`, that corresponds to the [**Sylabs Cloud Library**](https://cloud.sylabs.io).  Images in there are organised as: `<user>/<project>/<name>:<tag>`.  
 In the example above we didn't specify the **user**, `library`, and the **project**, `default`.  Why?  Because the specific case of `library/default/` can be omitted.  The full specification is used in the next example:
 
-```
+```bash
 $ singularity exec library://library/default/ubuntu:16.04 echo "Hello World"
 ```
-{: .bash}
+{: .source}
 
 ```
 Hello World
@@ -109,10 +109,10 @@ Here we are also experiencing image caching in action: the output has no more me
 Interestingly, Singularity is able to download and run Docker images as well.  
 Let's try and download a Ubuntu container from the [**Docker Hub**](https://hub.docker.com), *i.e.* the main registry for Docker containers:
 
-```
+```bash
 $ singularity exec docker://ubuntu:16.04 cat /etc/os-release
 ```
-{: .bash}
+{: .source}
 
 ```
 INFO:    Converting OCI blobs to SIF format
@@ -163,10 +163,10 @@ Docker Hub organises images only by users (also called *repositories*), not by p
 >
 > > ## Solution
 > >
-> > ```
+> > ```bash
 > > $ singularity exec docker://ubuntu cat /etc/os-release
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > ```
 > > [..]
@@ -187,10 +187,10 @@ Sometimes it can be useful to open a shell inside a container, rather than to ex
 
 Achieve this by using `singularity shell`:
 
-```
+```bash
 $ singularity shell docker://ubuntu:16.04
 ```
-{: .bash}
+{: .source}
 
 ```
 Singularity>
@@ -208,17 +208,17 @@ An alternative option to handle images is to download them to a known location, 
 
 Let's use `singularity pull` to save the image to a specified path (output might differ depending on the Singularity version you use):
 
-```
+```bash
 $ singularity pull docker://ubuntu:16.04
 ```
-{: .bash}
+{: .source}
 
 By default, the image is saved in the current directory:
 
-```
+```bash
 $ ls
 ```
-{: .bash}
+{: .source}
 
 ```
 ubuntu_16.04.sif
@@ -227,10 +227,10 @@ ubuntu_16.04.sif
 
 Then you can use this image file by:
 
-```
+```bash
 $ singularity exec ./ubuntu_16.04.sif echo "Hello World"
 ```
-{: .bash}
+{: .source}
 
 ```
 Hello World
@@ -239,19 +239,19 @@ Hello World
 
 You can specify the storage location with the `--dir` flag:
 
-```
+```bash
 $ mkdir -p sif_lib
 $ singularity pull --dir ~/path/to/sif/lib docker://library/ubuntu:16.04
 ```
-{: .bash}
+{: .source}
 
 Being able to specify download locations allows you to keep the local set of images organised and tidy, by making use of a directory tree.  It also allows for easy sharing of images within your team in a shared resource.  In general, you will need to specify the location of the image upon execution, *e.g.* by defining a dedicated variable:
 
-```
+```bash
 $ export image="~/path/to/sif/lib/ubuntu_16.04.sif"
 $ singularity exec $image echo "Hello Again"
 ```
-{: .bash}
+{: .source}
 
 ```
 Hello Again
@@ -267,10 +267,10 @@ The default directory location for the image cache is `$HOME/.singularity/cache`
 
 If you are running out of disk space, you can inspect the cache with this command (omit `-v` before Singularity version 3.4):
 
-```
+```bash
 $ singularity cache list -v
 ```
-{: .bash}
+{: .source}
 
 ```
 NAME                     DATE CREATED           SIZE             TYPE
@@ -291,10 +291,10 @@ Total space used: 146.49 MB
 
 we are not going to clean the cache in this tutorial, as cached images will turn out useful later on.  Let us just perform a dry-run using the `-n` option:
 
-```
+```bash
 $ singularity cache clean -n
 ```
-{: .bash}
+{: .source}
 
 ```
 User requested a dry run. Not actually deleting any data!
@@ -339,17 +339,17 @@ Right now, the Sylabs Cloud Library does not contain a large number of images.  
 > >
 > > Pull:
 > >
-> > ```
+> > ```bash
 > > $ singularity pull docker://python:3-slim
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > Get Python version:
 > >
-> > ```
+> > ```bash
 > > $ singularity exec ./python_3-slim.sif python --version
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > ```
 > > Python 3.8.0

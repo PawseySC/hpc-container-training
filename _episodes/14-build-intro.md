@@ -24,16 +24,16 @@ Let us cd into the appropriate directory:
 ```
 $ cd $TUTO/demos/lolcow
 ```
-{: .bash}
+{: .source}
 
 To build an image we need a recipe, or **definition file**, in the Singularity language.  You'll learn more on how to write one in a dedicated episode.
 
 Here, let's use one, `lolcow.def`, to build our first image.  To this end we're using `sudo singularity build`, followed by the filename (and path) we decide to attribute to the container image, and then by the filename of the def file to be used:
 
-```
+```bash
 $ sudo singularity build lolcow.sif lolcow.def
 ```
-{: .bash}
+{: .source}
 
 This build should take approximately 5 minutes to complete:
 
@@ -56,7 +56,7 @@ At the end, you'll find the final image file, `lolcow.sif`, in your directory:
 ```
 $ ls
 ```
-{: .bash}
+{: .source}
 
 ```
 lolcow.def lolcow.sif
@@ -69,24 +69,42 @@ lolcow.def lolcow.sif
 As the image builds, let's discuss this important matter.  
 
 Singularity does not allow for privileges escalation.  
-In other words, if you are a standard user and you run `singularity`, any command inside the container will be run with the privileges of the standard user, *i.e.* without admin powers.  If you try and `sudo` from inside the container you will get an error.  
-On the other hand, if your user can run with *sudo*, and if you then decide to run Singularity as `sudo singularity`, then you will run any command from inside the container with admin powers.  
-This design contributes to making Singularity safe to run on HPC: users without admin rights are unable to escalate their privileges from inside the containers.
+In other words, if you are a standard user and you run `singularity`, any command
+inside the container will be run with the privileges of the standard user, *i.e.*
+without admin powers.  If you try and `sudo` from inside the container you will
+get an error.  
 
-However, when building a container image you might need to install software using commands that require admin rights, *e.g.* `apt get` in Ubuntu/Debian or `yum` in Centos.  To achieve this, you need to run `sudo singularity build`, as we have just done above.  
-This requirement implies that you must carry out your build in a machine where you DO have admin rights. Ruling out HPC systems, suitable platforms to build container images can be your laptop, an office workstation, or a virtual machine on the cloud.
+On the other hand, if your user can run with *sudo*, and if you then decide to
+run Singularity as `sudo singularity`, then you will run any command from inside
+the container with admin powers. This design contributes to making Singularity
+safe to run on HPC: users without admin rights are unable to escalate their privileges
+from inside the containers.
+
+However, when building a container image you might need to install software using
+commands that require admin rights, *e.g.* `apt get` in Ubuntu/Debian or `yum` in
+Centos. To achieve this, you need to run `sudo singularity build`, as we have just
+done above.
+
+This requirement implies that you must carry out your build in a machine where you
+**DO** have admin rights. Ruling out HPC systems, suitable platforms to build container
+images can be your laptop, an office workstation, or a virtual machine on the cloud.
 
 
 ### Remote build
 
-What if you need to build an image from a system where you don't have admin privileges, *i.e.* you can't run commands with *sudo*?
+What if you need to build an image from a system where you don't have admin privileges,
+*i.e.* you can't run commands with *sudo*?
 
-Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**; once again (see below) you will need a Sylabs account and an `access token` to use this feature.  If this is the case, just use `singularity build -r` to proceed with the remote build.  Once finished, the image will be downloaded so that it's ready to use:
+Singularity offers the option to run a build remotely, using the **Sylabs Remote Builder**;
+once again (see below) you will need a Sylabs account and an `access token` to
+use this feature.  If this is the case, just use `singularity build -r` to proceed
+with the remote build.  Once finished, the image will be downloaded so that it's
+ready to use:
 
 ```
 $ singularity build -r lolcow_remote.sif lolcow.def
 ```
-{: .bash}
+{: .source}
 
 ```
 INFO:    Remote "default" added.
@@ -117,10 +135,10 @@ At the time of writing, when using the Remote Builder you won't be able to use t
 >
 > > ## Solution
 > >
-> > ```
+> > ```bash
 > > $ singularity exec lolcow.sif fortune
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > ```
 > > Whenever you find that you are on the side of the majority, it is time
@@ -129,18 +147,18 @@ At the time of writing, when using the Remote Builder you won't be able to use t
 > > ```
 > > {: .output}
 > {: .solution}
-> 
+>
 > Now, try and run this pipe of commands: `bash -c 'fortune | cowsay | lolcat'`.
-> 
+>
 > > ## Solution
-> > 
-> > ```
+> >
+> > ```bash
 > > $ singularity exec lolcow.sif bash -c 'fortune | cowsay | lolcat'
 > > ```
-> > {: .bash}
-> > 
+> > {: .source}
+> >
 > > You will get something similar to this, hopefully just more colourful:
-> > 
+> >
 > > ```
 > >  _______________________________________
 > > / Have a place for everything and keep  \
@@ -157,7 +175,7 @@ At the time of writing, when using the Remote Builder you won't be able to use t
 > > ```
 > > {: .output}
 > {: .solution}
-> 
+>
 > Great, we've just containerised a cow that cites novelists!  
 {: .challenge}
 
@@ -175,10 +193,10 @@ Sylabs offer their own image hosting platform, the [**Sylabs Cloud Library**](ht
 Once you create an account, you'll need to click on your account name on the top right of the page, select `Access Tokens`, then create a token, and copy it to the clipboard.  
 Then you can configure the machine you're using for building container images, so that you can also push them to the Cloud Library:
 
-```
+```bash
 $ singularity remote login
 ```
-{: .bash}
+{: .source}
 
 ```
 Generate an API Key at https://cloud.sylabs.io/auth/tokens, and paste here:
@@ -195,11 +213,11 @@ INFO:    API Key Verified!
 
 You are now ready to push your image to the Cloud Library, *e.g.* via `singularity push`:
 
-```
+```bash
 $ export MY_SYLABS_USER="my_sylabs_user"
 $ singularity push -U lolcow.sif library://$MY_SYLABS_USER/default/lolcow:30oct19
 ```
-{: .bash}
+{: .source}
 
 ```
 WARNING: Skipping container verifying
@@ -212,10 +230,10 @@ Also note once again the format for the registry: `<user>/<project>/<name>:<tag>
 
 Finally, you (or other peers) are now able to pull your image from the Cloud Library:
 
-```
+```bash
 $ singularity pull -U library://$MY_SYLABS_USER/default/lolcow:30oct19
 ```
-{: .bash}
+{: .source}
 
 ```
 INFO:    Downloading library image

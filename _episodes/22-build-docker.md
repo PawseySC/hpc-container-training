@@ -52,17 +52,17 @@ Note that Singularity versions prior to 3.0 used different image formats, charac
 
 Let's cd into the relevant demo directory:
 
-```
+```bash
 $ cd $TUTO/demos/lolcow_docker
 ```
-{: .bash}
+{: .source}
 
 Let us also start building the image with `docker build` straight away.  Meanwhile, we'll bring the discussion on.
 
-```
+```bash
 $ sudo docker build -t lolcow:1Nov19 .
 ```
-{: .bash}
+{: .source}
 
 In the command above, `.` is the location of the build context (*i.e.* the directory for the Dockerfile).  
 The `-t` flag is used to specify the image name (compulsory) and tag (optional).
@@ -116,7 +116,7 @@ Successfully tagged lolcow:1Nov19
 
 The image we are building is very similar to the one we built with Singularity.  Let's have a look at its `Dockerfile` recipe file in the demo directory:
 
-```
+```docker
 FROM ubuntu:18.04
 
 LABEL maintainer="Pawsey Supercomputing Centre"
@@ -163,10 +163,10 @@ Well, each `RUN` creates a distinct **layer** in the final image, increasing its
 We know that Docker container images are not single files, but rather adopt a multi-layered format.  To keep things tidy, Docker stores images and their layers in a hidden directory, under its own control.  
 To get the list of available images, including the ones you built, use `docker images`:
 
-```
+```bash
 $ sudo docker images
 ```
-{: .bash}
+{: .source}
 
 ```
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
@@ -181,10 +181,10 @@ Quite often devising a recipe to install software involves a certain deal of tri
 
 If you need to inspect a Docker container during build, you can open an interactive shell session this way:
 
-```
+```bash
 $ sudo docker run --rm -it ubuntu:18.04 bash
 ```
-{: .bash}
+{: .source}
 
 ```
 root@dd1ca993f4ad:/#
@@ -202,26 +202,26 @@ When you're done, type `exit`, or hit `Ctrl-D`, to leave the interactive shell.
 
 If you have a (free) Docker Hub account you must first login to Docker.
 
-```
+```bash
 $ sudo docker login
 ```
-{: .bash}
+{: .source}
 
 You are now ready to push your newly created image to the Docker Hub web registry.
 
 First, let us create a second tag for the image, that includes your Docker Account.  To this end we'll use `docker tag`:
 
-```
+```bash
 $ sudo docker tag lolcow:1Nov19 <your-dockerhub-account>/lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 Now we can push the image:
 
-```
+```bash
 $ sudo docker push <your-dockerhub-account>/lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 ```
 The push refers to repository [docker.io/marcodelapierre/lolcow]
@@ -245,17 +245,17 @@ For instance, this can be useful when needing to transfer or share images includ
 
 Use `docker save` to create the archive:
 
-```
+```bash
 $ sudo docker save -o lolcow_1Nov19.tar.gz lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 After the transfer, use `docker load` to extract the image in a format that is usable by Docker:
 
-```
+```bash
 $ sudo docker load -i lolcow_1Nov19.tar.gz
 ```
-{: .bash}
+{: .source}
 
 ```
 Loaded image: lolcow:1Nov19
@@ -269,10 +269,10 @@ Loaded image: lolcow:1Nov19
 
 Let's give this image a go! Let's execute it without any argument to use the default command:
 
-```
+```bash
 $ sudo docker run --rm lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 ```
  _______________________________________
@@ -289,10 +289,10 @@ $ sudo docker run --rm lolcow:1Nov19
 
 Note how the default command can be readily overwritten:
 
-```
+```bash
 $ sudo docker run --rm lolcow:1Nov19 echo "Hello World!"
 ```
-{: .bash}
+{: .source}
 
 ```
 Hello World!
@@ -307,24 +307,24 @@ As seen in a previous episode, the Singularity `pull` command can take care of c
 
 If you have pushed the image to Docker Hub, just execute:
 
-```
+```bash
 $ singularity pull docker://<your-dockerhub-account>/lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 If your Docker-equipped machine also comes with Singularity, you can also grab the image from the local image repo, using the `docker-daemon:` prefix.  Due to a current bug in Singularity, you will need to ditch the double slashes `//`:
 
-```
+```bash
 $ singularity pull docker-daemon:lolcow:1Nov19
 ```
-{: .bash}
+{: .source}
 
 Does it work?
 
-```
+```bash
 $ ./lolcow_1Nov19.sif
 ```
-{: .bash}
+{: .source}
 
 ```
  ________________________________________
@@ -372,7 +372,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 >
 > > ## Dockerfile
 > >
-> > ```
+> > ```docker
 > > # Make sure to add comments all the time
 > > # Use ubuntu 18.04, perhaps doesn't work with later versions
 > > FROM ubuntu:18.04
@@ -446,7 +446,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 > This docker file lacks useful metadata. Consider adding it.
 > > ## Dockerfile
 > >
-> > ```
+> > ```docker
 > > FROM continuumio/miniconda3:4.5.11
 > >
 > > LABEL maintainer="someone.somewhere@pawsey.org.au"
@@ -484,7 +484,7 @@ Have a look at these, just to get a taste of what a production Dockerfile might 
 >
 > > ## Dockerfile
 > >
-> > ```
+> > ```docker
 > > LABEL maintainer="someone.somewhere@pawsey.org.au"
 > > FROM rocker/tidyverse:latest
 > >

@@ -33,7 +33,7 @@ $ cd $TUTO/demos/lolcow
 ```
 {: .bash}
 
-How does `lolcow.def` look like?
+What does `lolcow.def` contain?
 
 ```
 Bootstrap: docker
@@ -82,10 +82,10 @@ This section is used to copy files from the host, *i.e.* <src-file>, inside the 
 
 The `%labels` section is used to add metadata to the container image.  These can be then inspected by using
 
-```
+```bash
 $ singularity inspect lolcow.sif
 ```
-{: .bash}
+{: .source}
 
 ```
 ==labels==
@@ -105,10 +105,10 @@ See how the `Author` and `Version` metadata are in the list.
 
 The text content of the `%help` section is also embedded in the image, and can be accessed via
 
-```
+```bash
 $ singularity run-help lolcow.sif
 ```
-{: .bash}
+{: .source}
 
 ```
     This is a demo container used to illustrate a def file.
@@ -121,20 +121,20 @@ This can be useful to provide a description of the container, or even instructio
 
 Finally, note how the def file used to generate the image can be displayed using
 
-```
+```bash
 $ singularity inspect -d lolcow.sif
 ```
-{: .bash}
+{: .source}
 
 
 ### Run a container as an application
 
 There's one section of the def file we haven't commented on yet.  `%runscript` allows you to define a default command for the image. This command can then be used if you run the container as an executable:
 
-```
+```bash
 $ ./lolcow.sif
 ```
-{: .bash}
+{: .source}
 
 ```
  ______________________________________
@@ -151,10 +151,10 @@ $ ./lolcow.sif
 
 Or, if you need to specify Singularity runtime flags, *e.g.*:
 
-```
+```bash
 $ singularity run -B $TUTO/_episodes lolcow.sif
 ```
-{: .bash}
+{: .source}
 
 ```
  ___________________________________
@@ -194,17 +194,17 @@ The def file specification has a number of other interesting features.  To know 
 
 2. If you are in a development phase, where you don't know yet what you will include in your final container image, you can start with a **sandbox** image.  This is a special type of image designed for development purposes, consisting not of a single file, but instead of a directory.  To create one, run something like:
 
-    ```
+    ```bash
     $ sudo singularity build --sandbox playbox/ docker://ubuntu:18.04
     ```
-    {: .bash}
+    {: .source}
 
     Then to open it and play, run:
 
-    ```
+    ```bash
     $ sudo singularity shell --writable playbox/
     ```
-    {: .bash}
+    {: .source}
 
     Do NOT use sandboxes for production, as their design is not reproducible by nature.  
     More information on sandbox images can be found at the [Singularity docs on building images](https://singularity.hpcng.org/user-docs/3.5/build_a_container.html#creating-writable-sandbox-directories).

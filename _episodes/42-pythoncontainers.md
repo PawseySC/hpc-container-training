@@ -1,9 +1,14 @@
 ---
-title: "Python containers: build best practices"
-teaching: 10
-exercises: 40
+title: "Python containers"
+teaching: 15
+exercises: 15
 questions:
 objectives:
+- Discuss how to have reproducibile builds with `pip` and `conda`
+- Discuss how to build `mpi4py`
+keypoints:
+- Use explicit versions of python packages by using `pip freeze` and `pip install -r`
+
 ---
 
 
@@ -33,27 +38,27 @@ Then, intelligently merging the Dockerfiles will do the job.
 
 ### Containerising *astropy* using *pip*
 
-Let's practice installing Python packages in a container using *pip*; we'll use the base image `python:3.8-slim`, and the package `astropy` as an example  (files under `2.pip/`).
-
-Here is the first, minimal iteration of the image recipe, `Dockerfile.1`:
-
-```
+Let's practice installing Python packages in a container using *pip*; we'll use
+the base image `python:3.8-slim`, and the package `astropy` as an example:
+{% highlight docker %}
 FROM python:3.8-slim
 
 RUN pip install astropy
 
 CMD [ "/bin/bash" ]
-```
-{: .source}
+{% endhighlight %}
 
-Seems straightforward, right?  Note how the Dockerfile is re-defining the default command to the `bash` shell; this is because `python` images set it to the Python console.  Have a look at the [Dockerfile](https://github.com/docker-library/python/blob/master/3.8/buster/slim/Dockerfile) for `python:3.8-slim` as a reference.  If you prefer the latter setting, just delete the last line.
+Seems straightforward, right?  Note how the Dockerfile is re-defining the default
+command to the `bash` shell; this is because `python` images set it to the Python console.  
+Have a look at the [Dockerfile](https://github.com/docker-library/python/blob/master/3.8/buster/slim/Dockerfile)
+for `python:3.8-slim` as a reference.  If you prefer the latter setting, just delete the last line.
 
 Let's build the image, have a look at the output, and then check the image size with `docker images`:
 
-```
+```bash
 $ docker build -t p:1 -f Dockerfile.1 .
 ```
-{: .bash}
+{: .source}
 
 ```
 Sending build context to Docker daemon  2.048kB
@@ -79,13 +84,13 @@ Successfully tagged p:1
 {: .output}
 
 A couple of notes here:
-* at the time of writing, we're installing `astropy` version `4.0.1.post1`;
-* `astropy` also depends on `numpy`, so the `pip` process installs both these packages;
+* The version of `astropy` version depends on the version of pip. Here `4.0.1.post1` is installed.
+* `astropy` depends on `numpy`, so the `pip` installs both.
 * the final image size is 228 MB.
 
-Can we reduce image size?  Sure, let's have a look at `Dockerfile.2`:
+Can we reduce image size? Yes by disabling the cache used by pip:
 
-```
+```docker
 FROM python:3.8-slim
 
 RUN pip --no-cache-dir install astropy
@@ -96,9 +101,9 @@ CMD [ "/bin/bash" ]
 
 If we build this image, we can see that using the option `pip --no-cache-dir` reduces the size by 22 MB, or 10%, to 206 MB.
 
-Now, let's try and add version control to this image.  As in the Dockerfile we're asking `pip` to install `astropy`, we can make its version explicit as in `Dockerfile.3`:
+Now, let's try and add version control to this image:
 
-```
+```docker
 FROM python:3.8-slim
 
 ARG ASTRO_VERSION="3.2.3"
@@ -108,10 +113,14 @@ CMD [ "/bin/bash" ]
 ```
 {: .source}
 
-In this example, the default installed version is `3.2.3`.  This can be changed at build time with `--build-arg ASTRO_VERSION=<ALTERNATE VERSION>`.
+In this example, the default installed version is `3.2.3`.  This can be changed
+at build time with `--build-arg ASTRO_VERSION=<ALTERNATE VERSION>`.
 
-This was easy enough.  Now, how about build reproducibility?  Or, put in other words, are there other packages for which we might need to keep explicit track of the version?
-Well, when we install Python packages, most of them come with some dependency; in this case it's `numpy`.  Let's see ways to track these when building a container.  We're going to see two examples, both of which rely on using a `requirements` file.
+This was easy enough.  Now, how about build reproducibility?  Or, put in other words,
+are there other packages for which we might need to keep explicit track of the version?
+Well, when we install Python packages, most of them come with some dependency;
+in this case it's `numpy`.  Let's see ways to track these when building a container.  
+We're going to see two examples, both of which rely on using a `requirements` file.
 
 #### *pip* build reproducibility, way 1: *pip freeze*
 
@@ -124,14 +133,14 @@ astropy==3.2.3
 
 And now, let's start an interactive session with our base image, `python:3.8-slim`.  We need the current directory to be bind mounted in the container:
 
-```
+```bash
 $ docker run --rm -it -v $(pwd):/data -w /data python:3.8-slim bash
 ```
-{: .bash}
+{: .source}
 
 Now, from inside the container let's execute the `prepare4.sh` script:
 
-```
+```bash
 #!/bin/bash
 
 # run this from the miniconda3 container
@@ -155,7 +164,7 @@ numpy==1.19.1
 
 We can then use this file as a reference in the Dockerfile, see `Dockerfile.4`:
 
-```
+```docker
 FROM python:3.8-slim
 
 ARG REQ_FILE="requirements4-3sep.txt"
@@ -179,10 +188,10 @@ This alternate way makes use of a Python package called `pip-tools`, see its [Gi
 
 Then, starting from our initial `requirements.in` file, we can generate the final one simply running:
 
-```
+```bash
 $ pip-compile -o requirements5-3sep.txt requirements.in
 ```
-{: .bash}
+{: .source}
 
 The list of packages is consistent with the *pip freeze* way, just with some extra comments:
 
@@ -204,7 +213,7 @@ numpy==1.19.1             # via astropy
 For folks who prefer `conda` over `pip`, let's see how we can get an `astropy` container image with this approach (files under `2.conda/`).
 Let's start with the basic `Dockerfile.1`, which keeps track of `astropy` version only:
 
-```
+```docker
 FROM continuumio/miniconda3:4.8.2
 
 # note, as of september 2020, "--no-update-deps" seems not to be respected
@@ -220,17 +229,17 @@ Then, note how we're using the `conda install` flag `--no-update-deps` to ask `c
 
 We can build the image with:
 
-```
+```bash
 $ docker build -t c:1 -f Dockerfile.1 .
 ```
-{: .bash}
+{: .source}
 
 As per typical `conda` installations, the list of new/updated packages is longer than with `pip`, over 30 packages.
 Also, note the final image size is 1.6 GB.
 
 First, let's see how we can reduce the image size using `conda clean`, see `Dockerfile.2`:
 
-```
+```docker
 FROM continuumio/miniconda3:4.8.2
 
 # note, as of september 2020, "--no-update-deps" seems not to be respected
@@ -253,14 +262,14 @@ astropy==3.2.3
 
 Now, similar to the *pip* case, let's start an interactive session:
 
-```
+```bash
 $ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.8.2 bash
 ```
-{: .bash}
+{: .source}
 
 And run this preparation script, `prepare3.sh`:
 
-```
+```bash
 #!/bin/bash
 
 # run this from the miniconda3 container
@@ -287,7 +296,7 @@ Environment export in `conda` creates a YAML file that allows creation of a comp
 As we just want this information to install packages in the preexisting base environment of the base image, we need to polish this file, *e.g.* using `sed`.  A bunch of edits will return use the final `requirements-3sep.yaml` (see example directory), which only contain the list of versioned packages.
 This is the requirements file we can use in the Dockerfile, see `Dockerfile.3`:
 
-```
+```docker
 FROM continuumio/miniconda3:4.8.2
 
 # note, as of september 2020, "--no-update-deps" seems not to be respected
@@ -308,14 +317,14 @@ Note how we're now using the option `conda install --no-deps`, to tell `conda` n
 This is one more aspect worth mentioning when dealing with `conda` container images.
 
 So, `conda activate` run in a Dockerfile would not work as intended, as variable settings would only leave inside the corresponding `RUN` layer.
-Then, another way might be to embed environment sourcing inside *profile* files, such as `~/.bashrc`, `~/.profile`, or even something like `/etc/profile.d/conda.sh`.  However, these files are only sourced when `bash` is launched, so for instance not when running a `python` execution directly.  Also, files under home, `~/`, would not work with Singularity: Docker home is *root*'s home, whereas Singularity runs as the host user.
+Then, another way might be to embed environment sourcing inside *profile* files, such as `~/.sourcerc`, `~/.profile`, or even something like `/etc/profile.d/conda.sh`.  However, these files are only sourced when `bash` is launched, so for instance not when running a `python` execution directly.  Also, files under home, `~/`, would not work with Singularity: Docker home is *root*'s home, whereas Singularity runs as the host user.
 
 In summary, the most robust way to ensure shell variables for the conda environment are set is to set them explicitly in the Dockerfile using `ENV` instructions.
 
 In terms of general conda variables, the `continuumio` base images all set a modified `PATH` variable, so that conda and binaries in the base environment are found (see [Dockerfile](https://github.com/ContinuumIO/docker-images/blob/master/miniconda3/debian/Dockerfile)).
 Explicitly setting also the `CONDA_PREFIX` is not done in the base image, so it does not hurt doing it in our Dockerfile, see `Dockerfile.4`:
 
-```
+```docker
 FROM continuumio/miniconda3:4.8.2
 
 # note, as of september 2020, "--no-update-deps" seems not to be respected
@@ -349,10 +358,10 @@ Well, this is not the case for `astropy` but, depending on the installed package
 
 It's possible to capture them by running another trial installation interactively, and comparing the environment before and after it's done:
 
-```
+```bash
 $ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.8.2 bash
 ```
-{: .bash}
+{: .source}
 
 ```
 /# env >before
@@ -360,7 +369,7 @@ $ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.8.2 bash
 /# env >after
 /# diff before after
 ```
-{: .bash}
+{: .source}
 
 If there are any spare variables, it's advisable to review them, and include relevant ones in the Dockerfile using `ENV` instructions.
 
@@ -381,15 +390,19 @@ So, here's our plan:
 
 Note how in our container image we need both Python and MPI utilities.  We know we have base images for both, *e.g.* `python:3.8-slim` and `pawsey/mpich-base:3.1.4_ubuntu18.04`.
 Can we combine them?  Upon inspection, we will notice that there are no incompatible steps amongst the two, so .. yes we can combine them.
-How to combine them?  Well, there's no Docker instruction to achieve this from the two images, so the only option is to pick one and then install the other set of utilities explicitly in the Dockerfile.
-This is when it gets handy to have a look at the Dockerfiles of our base images of interest: [python](https://github.com/docker-library/python/blob/master/3.8/buster/slim/Dockerfile), [pawsey/mpich-base](https://github.com/PawseySC/pawsey-containers/blob/master/mpich-base/Dockerfile).
+How to combine them?  Well, there's no Docker instruction to achieve this from the two images, so the only option
+is to pick one and then install the other set of utilities explicitly in the Dockerfile.
+
+This is when it gets handy to have a look at the Dockerfiles of our base images of interest:
+[python](https://github.com/docker-library/python/blob/master/3.8/buster/slim/Dockerfile),
+[pawsey/mpich-base](https://github.com/PawseySC/pawsey-containers/blob/master/mpich-base/Dockerfile).
 The former is 143 lines long, the latter only 64, and we actually only need the first 38 (after that, it's about installing a benchmark suite, which we don't need here) .. so looks more convenient to embed the latter on top of the former.
 
 As regards `mpi4py`, if we run a trial interactive installation we'll discover that this package has no further `pip` package dependencies, so we can specify its version straight in the Dockerfile.
 
 Let's have a look at how the final `Dockerfile` looks like:
 
-```
+```docker
 FROM python:3.8-slim
 
 RUN apt-get update -qq \
@@ -426,14 +439,3 @@ RUN pip --no-cache-dir install --no-deps mpi4py==${MPI4PY_VERSION}
 CMD [ "/bin/bash" ]
 ```
 {: .source}
-
-This makes sense, doesn't it?
-
-We can build the image using:
-
-```
-$ docker build -t m:1 .
-```
-{: .bash}
-
-We're going to use this image again in the next episode.

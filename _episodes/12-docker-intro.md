@@ -56,10 +56,11 @@ To get a more detailed introduction on Docker containers, see this other worksho
 
 Let's run a simple command:
 
-```
+
+```bash
 $ docker run ubuntu cat /etc/os-release
 ```
-{: .bash}
+{: .source}
 
 ```
 Unable to find image 'ubuntu:latest' locally
@@ -99,10 +100,10 @@ Most Linux distributions have pre-built images available on Docker Hub, so you c
 
 Note in our example Docker uses the 'ubuntu:latest' tag, since we didn't specify what version we want.  We can specify a specific version of ubuntu like this:
 
-```
+```bash
 $ docker run ubuntu:17.04 cat /etc/os-release
 ```
-{: .bash}
+{: .source}
 
 ```
 NAME="Ubuntu"
@@ -122,10 +123,10 @@ UBUNTU_CODENAME=zesty
 
 Docker caches images on your local disk, so the next time you need to run your container it will be faster:
 
-```
+```bash
 $ docker run ubuntu /bin/echo 'hello world'
 ```
-{: .bash}
+{: .source}
 
 ```
 hello world
@@ -134,33 +135,33 @@ hello world
 
 You can list all Docker containers on your system with
 
-```
+```bash
 $ docker ps -a
 ```
-{: .bash}
+{: .source}
 
 The `-a` (or `--all`) flag prints all containers, i.e. those currently running and any stopped containers.
 
 Similarly, you can list all docker images you have with
 
-```
+```bash
 $ docker images
 ```
-{: .bash}
+{: .source}
 
 In the example above, Docker automatically downloaded the Ubuntu image.  If you want to explicitly download an image, you can use the `docker pull` command:
 
-```
+```bash
 $ docker pull ubuntu
 ```
-{: .bash}
+{: .source}
 
 Another handy Docker command line option is `docker search`.  You can use it to quickly search for available images on Docker Hub.  Note that you may still want to visit the [Docker Hub](https://hub.docker.com) webpage to find out more information about a particular image (e.g. run commands, configuration instructions, etc.).
 
-```
+```bash
 $ docker search tensorflow
 ```
-{: .bash}
+{: .source}
 
 ```
 NAME                                DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
@@ -185,25 +186,21 @@ bitnami/tensorflow-inception        Bitnami Docker Image for TensorFlow Inceptio
 
 Docker has the option to run containers interactively.  While this is convenient (and useful for debugging), in general you shouldn't use this model as your standard way of working with containers.  To run interactively, we just need to use the `-i` and `-t` flags, or `-it` for brevity:
 
-```
+```bash
 $ docker run -i -t ubuntu /bin/bash
-```
-{: .bash}
-
-```
 root@c69d6f8d89bd:/# id
 ```
-{: .bash}
+{: .source}
 
 ```
 uid=0(root) gid=0(root) groups=0(root)
 ```
 {: .output}
 
-```
+```bash
 root@c69d6f8d89bd:/# ls
 ```
-{: .bash}
+{: .source}
 
 ```
 bin   dev  home  lib64  mnt  proc  run   srv  tmp  var
@@ -211,10 +208,10 @@ boot  etc  lib   media  opt  root  sbin  sys  usr
 ```
 {: .output}
 
-```
+```bash
 root@c69d6f8d89bd:/# exit   # or hit CTRL-D
 ```
-{: .bash}
+{: .source}
 
 The `-t` and `-i` options make sure we allocate a terminal to the container, and keep its STDIN (standard input) open.
 
@@ -233,27 +230,26 @@ As you can see, you have root access in your container, and you are in what look
 > >
 > > Pull:
 > >
-> > ```
+> > ```bash
 > > $ docker pull continuumio/miniconda3:4.5.12
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > Get Python version:
 > >
-> > ```
+> > ```bash
 > > $ docker run continuumio/miniconda3:4.5.12 python --version
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > Open and close an interactive console:
 > >
-> > ```
+> > ```bash
 > > $ docker run -it continuumio/miniconda3:4.5.12 python
-> > {: .bash}
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
-> > ```
+> > ```python
 > > >>> exit   # or hit CTRL-D
 > > ```
 > > {: .python}
@@ -270,11 +266,11 @@ As we mentioned above, lots of Docker defaults are about privileged runtime and 
 
 Long story short, this is what it takes:
 
-```
+```bash
 $ sudo docker run --rm -v $(pwd):/data -w /data -u $(id -u):$(id -g) -i ubuntu:18.04 echo "Good Morning" >hello1.txt
 $ ls -l hello1.txt
 ```
-{: .bash}
+{: .source}
 
 ```
 -rw-r----- 1 ubuntu ubuntu 13 Nov  1 08:29 hello1.txt
@@ -293,10 +289,10 @@ What about the `--rm` flag? To respond to this, let's move on.
 
 By default, when containers exit, they remain cached in the system for potential future restart.  Have a look at a list of running and stopped containers with `docker ps -a` (remove `-a` to only list running ones):
 
-```
+```bash
 $ sudo docker ps -a
 ```
-{: .bash}
+{: .source}
 
 ```
 CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS                       PORTS               NAMES
@@ -308,10 +304,10 @@ CONTAINER ID        IMAGE               COMMAND                 CREATED         
 
 It's possible to clean up cached, exited containers by means of `docker rm`; there's also an idiomatic way to clean all of them at once:
 
-```
+```bash
 $ sudo docker rm $(sudo docker ps -qa)
 ```
-{: .bash}
+{: .source}
 
 ```
 375a021f8674
@@ -324,10 +320,10 @@ If I know in advance I won't need to re-run a container after it exits, I can us
 
 Docker stores container images in a hidden directory under its own control.  To get the list of downloaded images use `docker images`:
 
-```
+```bash
 $ sudo docker images
 ```
-{: .bash}
+{: .source}
 
 ```
 REPOSITORY                        TAG                      IMAGE ID            CREATED             SIZE
@@ -337,10 +333,10 @@ ubuntu                            18.04                    775349758637        1
 
 If you don't need an image any more and want to clear up disk space, use `docker rmi` to remove it:
 
-```
+```bash
 $ sudo docker rmi ubuntu:18.04
 ```
-{: .bash}
+{: .source}
 
 ```
 Untagged: ubuntu:18.04

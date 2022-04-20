@@ -34,7 +34,7 @@ Always keep in mind that writing a Dockerfile is almost an art, which you can re
 #### Adding comments
 
 Most examples of Docker recipes that you will find are not well documented, nor easily maintainable. Consider the previous recipe for the lolcow container:
-```
+```docker
 FROM ubuntu:18.04
 
 LABEL maintainer="Pawsey Supercomputing Centre"
@@ -54,7 +54,7 @@ CMD fortune | cowsay | lolcat
 The recipe does not contain any comments, and more importantly the container built using this recipe will not have any metadata about what it contains. How can it be improved?
 
 For one, it should have a extensive set of labels:  
-```
+```docker
 LABEL maintainer="Aardvark"
 LABEL version="1.0.0"
 LABEL tags="ubuntu/18.04"
@@ -65,7 +65,7 @@ add colour via lolcat. "
 {: .source}
 
 Second, it will be easier to maintain if comments are added.
-```
+```docker
 # Use the ubuntu base image
 FROM ubuntu:18.04
 
@@ -88,14 +88,14 @@ installs have already been combined. However, if there was a typo it could be di
 to identify, particularly if lots of packages are being installed and if there are several typos.
 
 A pedagogical example would be:
-```
+```docker
 RUN apt-get -y update && \
   apt-get -y install cowsay fortun lolcats
 ```
 {: .source}
 
 Here there are two typos it might be easier to have each install command on a single line:
-```
+```docker
 RUN apt-get -y update
 RUN apt-get -y install cowsay
 RUN apt-get -y install fortun
@@ -107,7 +107,7 @@ RUN apt-get -y install lolcats
 The conatiner also contains all the files need to run `apt-get` and recently cached files.
 These are unlikely to be used when running the container so the recipe should also remove them
 once they have been used.
-```
+```docker
 # Use apt-get to install desired packages
 RUN apt-get -y update && \
   # install packages
@@ -125,7 +125,7 @@ such as ssh keys, are used and then removed all within a single `RUN` command, o
 a layer will contain sensitive information. An example is copying ssh keys from a host
 system into a container so that the container can access sensitive information during the
 build process. It is poor practice to copy ssh keys with the `COPY` command:
-```
+```docker
 # Copy the ssh keys to have git credentials
 # Git credential
 ARG SSH_KEY_PATH
@@ -138,7 +138,7 @@ COPY ${SSH_KEY_PATH}/known_hosts /root/.ssh/known_hosts
 
 Instead, it is critical that such sensitive information be limited to a single `RUN` command
 and removed once used.
-```
+```docker
 RUN mkdir /root/.ssh/ \
     # Copy ssh information within a run command
     && cp ${SSH_KEY_PATH}/id_rsa /root/.ssh/id_rsa \
@@ -172,14 +172,14 @@ Dockerfile installations are non-interactive by nature, *i.e.* no installer can 
 In Ubuntu/Debian, you can define a variable prior to running any `apt` command,
 that informs a shell in Ubuntu or Debian that you are not able to interact, so that no questions will be asked:
 
-```
+```docker
 ENV DEBIAN_FRONTEND="noninteractive"
 ```
 {: .source}
 
 Another pair of useful variables, again to be put at the beginning of the Dockerfile, are:
 
-```
+```docker
 ENV LANG="C.UTF-8" LC_ALL="C.UTF-8"
 ```
 {: .source}
@@ -199,7 +199,7 @@ Thankfully, there is already a ready-to-use set of MPI tests, the [OSU Micro-Ben
 This package provides a large number of MPI related tests. By comparing the results of
 these tests within a container to the same test running on the host system, you might be able
 to identify issues running MPI within the container:
-```
+```docker
 # build desired ABI compatibile MPI library
 # here this example shows how we might build OPENMPI
 # first build openmpi
@@ -214,16 +214,16 @@ RUN mkdir -p /tmp/openmpi-build \
       && wget https://download.open-mpi.org/release/open-mpi/${OPENMPI_DIR}/openmpi-${OPENMPI_VERSION}.tar.gz \
       && tar xzf openmpi-${OPENMPI_VERSION}.tar.gz \
       && cd openmpi-${OPENMPI_VERSION}  \
-      # build openmpi
+      # build openmpi \
       && ./configure ${OPENMPI_CONFIGURE_OPTIONS} \
       && make ${OPENMPI_MAKE_OPTIONS} \
       && make install \
       && ldconfig \
-      # remove the build directory now that the library is installed
+      # remove the build directory now that the library is installed \
       && cd / \
       && rm -rf /tmp/openmpi-build \
-      # now having built openmpi, build the osu benchmarks
-      # download, extract and build
+      # now having built openmpi, build the osu benchmarks \
+      # download, extract and build \
       && cd /tmp/osu-build \
       && wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_VERISON}.tar.gz  \
       && tar xzf osu-micro-benchmarks-${OSU_VERSION}.tar.gz \
@@ -232,11 +232,11 @@ RUN mkdir -p /tmp/openmpi-build \
       && make ${OSU_MAKE_OPTIONS} \
       && make install \
       && ldconfig \
-      # remove the build directory now that the library is installed
+      # remove the build directory now that the library is installed \
       && cd / \
       && rm -rf /tmp/osu-build
 ```
-{: .docker}
+{: .source}
 
 > ## Using abstraction and specific versions
 > In the above example, we have use of explicit versions to ensure **build-time**
@@ -249,7 +249,7 @@ The approach of having a simple test related to any Parallel API contained withi
 may reduce the number of issues you will encounter deploying containers on a variety of systems.
 It also maybe useful to even add a script that reports the libraries used by containerized
 applications at runtime:
-```
+```bash
 #!/bin/bash
 # list all applications of interest as space separated list
 apps=()
@@ -263,15 +263,15 @@ do
     ldd ${app}
 done
 ```
-{: .language-bash}
+{: .source}
 and have this script in `/usr/bin/applications-dependency-check`:
-```
+```docker
 # add ldd script
 ARG LDD_SCRIPT
 RUN cp -p ${LDD_SCRIPT} /usr/bin/applications-dependency-check \
       && chmod +x /usr/bin/applications-dependency-check
 ```
-{: .docker}
+{: .source}
 
 The Docker instruction `CMD` can be used to set the default command that gets executed
 by `docker run <IMAGE>` (without arguments) or `singularity run <IMAGE>`. If you don't specify it,
@@ -294,7 +294,7 @@ Such code will be built to run only on compatible CPU architecture. It is theref
 defined portable and performant containers:
 
 > ## Portable
-> ```
+> ```docker
 > # build from source a portable container
 > ARG OPTIMIZATION_FLAGS="-O2"
 > ARG source=<source>
@@ -309,11 +309,11 @@ defined portable and performant containers:
 >       && make CXXFLAGS=${OPTIMIZATION_FLAGS} && make install \
 >       && rm -rf /tmp/build
 > ```
-> {: .docker}
+> {: .source}
 {: .callout}
 
 > ## Performance
-> ```
+> ```docker
 > # build from source a CPU optimised build
 > ARG OPTIMIZATION_FLAGS="-O3 -march=znver3"
 > ARG source=<source>
@@ -328,7 +328,7 @@ defined portable and performant containers:
 >       && make CXXFLAGS=${OPTIMIZATION_FLAGS} && make install \
 >       && rm -rf /tmp/build
 > ```
-> {: .docker}
+> {: .source}
 {: .callout}
 
 You'll notice subtle differences in the `RUN` commands but that we have added metadata
