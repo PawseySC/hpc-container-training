@@ -1,7 +1,7 @@
 ---
 title: "Python containers"
 teaching: 15
-exercises: 15
+exercises: 10
 questions:
 objectives:
 - Discuss how to have reproducibile builds with `pip` and `conda`
@@ -405,6 +405,15 @@ Let's have a look at how the final `Dockerfile` looks like:
 ```docker
 FROM python:3.8-slim
 
+# set the arguments of MPICH
+ARG MPICH_VERSION="3.1.4"
+ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
+ARG MPICH_MAKE_OPTIONS="-j4"
+# and arguments for MPI4PY
+ARG MPI4PY_VERSION="3.0.3"
+
+# first get all the necessary pre-built packages
+# compile mpi and build python
 RUN apt-get update -qq \
       && apt-get -y --no-install-recommends install \
          build-essential \
@@ -415,10 +424,7 @@ RUN apt-get update -qq \
       && apt-get clean all \
       && rm -r /var/lib/apt/lists/*
 
-ARG MPICH_VERSION="3.1.4"
-ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
-ARG MPICH_MAKE_OPTIONS="-j4"
-
+# build MPI libraries
 RUN mkdir -p /tmp/mpich-build \
       && cd /tmp/mpich-build \
       && wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
@@ -431,9 +437,7 @@ RUN mkdir -p /tmp/mpich-build \
       && cp -p /tmp/mpich-build/mpich-${MPICH_VERSION}/examples/cpi /usr/bin/ \
       && cd / \
       && rm -rf /tmp/mpich-build
-
-ARG MPI4PY_VERSION="3.0.3"
-
+# build mpi4py
 RUN pip --no-cache-dir install --no-deps mpi4py==${MPI4PY_VERSION}
 
 CMD [ "/bin/bash" ]

@@ -7,12 +7,63 @@ objectives:
 - Get an overview of other tools of interest for building containers
 - Get an overview of other tools of interest for running containers on HPC
 keypoints:
-- HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
 - Spack can be useful to automate generation of image recipes, including also micro-architecture optimisations
+- HPCCM can be useful to write image recipes that are compatible both with Docker and Singularity
 - In addition to Singularity, other interesting container engines for HPC exist
 ---
 
-### HPC Container Maker
+### Spack
+
+[Spack](https://spack.io) is a package manager for HPC, with the main purpose of automating the build from source of scientific applications and their dependencies.  It has many features and functionalities, with a relatively concise command interface to select compilers, package versions, dependencies, build options, compiler optimisations, and more.
+
+Interestingly, Spack can also be used to automate the generation of Dockerfiles and Singularity def files.  In this regard, compared to other tools it easily allows to optimise the container build for a given CPU micro-architecture.  Thus, it can enable to reproducibly generate collections of container images for a given application, enforcing both portability and performance.
+
+Another advantageous feature is its registry of over 5000 package recipes that are ready for use.
+
+To give an example of how to generate a Dockefile with Spack, let's consider the bioinformatics package BLAST; suppose we need version 2.9.0.  Also suppose we want to optimise the application for running on Intel Haswell CPUs (or newer).  What we need is a so called Spack Environment file, in YAML format, which has to be called `spack.yaml`:
+
+```yaml
+spack:
+  specs:
+  - blast-plus@2.9.0 target="haswell"
+
+  container:
+    format: "docker"
+
+    images:
+      os: "ubuntu:18.04"
+      spack: "0.16"
+
+    os_packages:
+      build:
+      - cpio
+      final:
+      - libgomp1
+
+    labels:
+      maintainer: "Pawsey Supercomputing Centre"
+```
+{: .source}
+
+Without willing to provide an exaustive explanation of this file, note how the request for BLAST 2.9.0 optimised for Haswell is stated: `blast-plus@2.9.0 target="haswell"`.  Also note that we're requesting a Dockerfile by means of `format: "docker"`.  Now, you can cd into the demo directory:
+
+```bash
+$ cd $TUTO/demos/spack_blast
+```
+{: .source}
+
+And then create the Dockerfile just with:
+
+```bash
+$ spack containerize >Dockerfile
+```
+{: .source}
+
+More information on how to customise the creation of Dockefiles and def files with Spack can be found at the [Spack docs on container images](https://spack.readthedocs.io/en/latest/containers.html).
+
+### Even more container engines and tools
+
+#### HPC Container Maker
 
 [HPC Container Maker](https://github.com/NVIDIA/hpc-container-maker) (HPCCM) is a
 Python tool developed by Nvidia, whose only purpose is to write recipe files for containers.
@@ -64,58 +115,7 @@ porting to Dockerfiles and Singularity def files.
 
 More information on HPCCM can be found in the [HPCCM docs](https://github.com/NVIDIA/hpc-container-maker/tree/master/docs).
 
-
-### Spack
-
-[Spack](https://spack.io) is a package manager for HPC, with the main purpose of automating the build from source of scientific applications and their dependencies.  It has many features and functionalities, with a relatively concise command interface to select compilers, package versions, dependencies, build options, compiler optimisations, and more.
-
-Interestingly, Spack can also be used to automate the generation of Dockerfiles and Singularity def files.  In this regard, compared to other tools it easily allows to optimise the container build for a given CPU micro-architecture.  Thus, it can enable to reproducibly generate collections of container images for a given application, enforcing both portability and performance.
-
-Another advantageous feature is its registry of over 5000 package recipes that are ready for use.
-
-To give an example of how to generate a Dockefile with Spack, let's consider the bioinformatics package BLAST; suppose we need version 2.9.0.  Also suppose we want to optimise the application for running on Intel Haswell CPUs (or newer).  What we need is a so called Spack Environment file, in YAML format, which has to be called `spack.yaml`:
-
-```yaml
-spack:
-  specs:
-  - blast-plus@2.9.0 target="haswell"
-
-  container:
-    format: "docker"
-
-    images:
-      os: "ubuntu:18.04"
-      spack: "0.16"
-
-    os_packages:
-      build:
-      - cpio
-      final:
-      - libgomp1
-
-    labels:
-      maintainer: "Pawsey Supercomputing Centre"
-```
-{: .source}
-
-Without willing to provide an exaustive explanation of this file, note how the request for BLAST 2.9.0 optimised for Haswell is stated: `blast-plus@2.9.0 target="haswell"`.  Also note that we're requesting a Dockerfile by means of `format: "docker"`.  Now, you can cd into the demo directory:
-
-```bash
-$ cd $TUTO/demos/spack_blast
-```
-{: .source}
-
-And then create the Dockerfile just with:
-
-```bash
-$ spack containerize >Dockerfile
-```
-{: .source}
-
-More information on how to customise the creation of Dockefiles and def files with Spack can be found at the [Spack docs on container images](https://spack.readthedocs.io/en/latest/containers.html).
-
-
-### Podman
+#### Podman
 
 [Podman](https://podman.io) is an open-source container engine maintained by Red Hat.  It has quite similar features to Docker, with some important differences:
 
@@ -134,7 +134,7 @@ $ alias docker=podman
 {: .source}
 
 
-### Charliecloud
+#### Charliecloud
 
 [Charliecloud](https://hpc.github.io/charliecloud) is a promising container engine developed by LANL for HPC.
 
@@ -178,7 +178,7 @@ Here we're just showing one possible sequence of commands to pull and use the Ub
     {: .source}
 
 
-### Shifter
+#### Shifter
 
 [Shifter](https://docs.nersc.gov/development/shifter/) is a container engine developed by NERSC for HPC.
 
@@ -220,7 +220,7 @@ It is being deprecated by CSCS, as they have evolved the project into Sarus, see
 -->
 
 
-### Sarus
+#### Sarus
 
 [Sarus](https://sarus.readthedocs.io) is a container engine developed for HPC by CSCS in Switzerland.  It started as a fork of Shifter.
 
@@ -264,7 +264,7 @@ If you want to test it, you might just use the image `ubuntu:18.04` as a test be
     {: .source}
 
 
-### Enroot
+#### Enroot
 
 [Enroot](https://github.com/NVIDIA/enroot) is Nvidia way of deploying containerised applications on their platforms.
 

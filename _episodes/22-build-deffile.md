@@ -13,6 +13,14 @@ keypoints:
 - The `%environment` section allows you to specify shell variable definitions that are required at runtime
 ---
 
+> ## Before you start
+> Although Singularity builds offer some interesting advantages, right now the
+> Docker process is recommended due to its compatibility and use of layers.
+> We therefore recommand familiarizing yourself with Dockerfile syntax rather than
+> the recipe syntax used by Singularity. Only proceed if you know that you will
+> be building container images using singularity rather than building with docker
+> and using `singularity pull` from a docker repository to generate a SIF file. 
+{: .prereq}
 
 ### What is a def file?
 

@@ -113,7 +113,7 @@ $ export TUTO=$(pwd)
 > > $ cd $TUTO/demos
 > > $ nohup bash ./pull_big_images.sh &
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > **Alternatively**, if you are running at Pawsey, *e.g.* on Zeus, submit this other script with Slurm instead:
 > >
@@ -121,7 +121,7 @@ $ export TUTO=$(pwd)
 > > $ cd $TUTO/demos
 > > $ sbatch ./sbatch_pull_big_images.sh
 > > ```
-> > {: .bash}
+> > {: .source}
 > >
 > > This pull process will take at least one hour. Meanwhile, you'll be able to keep on going with this episode in your main terminal window.
 > >
@@ -136,7 +136,7 @@ $ export TUTO=$(pwd)
 > ```
 > $ salloc -n 1 -t 4:00:00
 > ```
-> {: .bash}
+> {: .source}
 >
 > ```
 > salloc: Granted job allocation 3453895
