@@ -25,9 +25,10 @@ keypoints:
 ### What is a def file?
 
 A *definition file*, or *def file*, is a recipe to build a container image with Singularity.  
-In practice, it is a collection of the standard shell commands you would use to build your software, plus Singularity-specific header lines that handle the build process.  We will discuss these below with an example.  
-Although there is no mandatory naming convention for def files, they are often characterised by the suffix `.def`.
-
+In practice, it is a collection of the standard shell commands you would use to build
+your software, plus Singularity-specific header lines that handle the build process.
+We will discuss these below with an example. Although there is no mandatory naming
+convention for def files, they are often characterised by the suffix `.def`.
 
 ### Core syntax of a definition file
 

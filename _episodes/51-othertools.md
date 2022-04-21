@@ -14,6 +14,12 @@ keypoints:
 
 ### Spack
 
+> ## Pawsey systems
+> Pawsey uses `spack` to install software, since this handles dependencies and naturally
+> ensures build time reproducibility. We recommend users familarize themselves
+> with the overall process of using spack to produce a docker container.
+{: .prereq}
+
 [Spack](https://spack.io) is a package manager for HPC, with the main purpose of automating the build from source of scientific applications and their dependencies.  It has many features and functionalities, with a relatively concise command interface to select compilers, package versions, dependencies, build options, compiler optimisations, and more.
 
 Interestingly, Spack can also be used to automate the generation of Dockerfiles and Singularity def files.  In this regard, compared to other tools it easily allows to optimise the container build for a given CPU micro-architecture.  Thus, it can enable to reproducibly generate collections of container images for a given application, enforcing both portability and performance.
@@ -45,7 +51,10 @@ spack:
 ```
 {: .source}
 
-Without willing to provide an exaustive explanation of this file, note how the request for BLAST 2.9.0 optimised for Haswell is stated: `blast-plus@2.9.0 target="haswell"`.  Also note that we're requesting a Dockerfile by means of `format: "docker"`.  Now, you can cd into the demo directory:
+Without willing to provide an exhaustive explanation of this file, note how the
+request for BLAST 2.9.0 optimised for Haswell is stated: `blast-plus@2.9.0 target="haswell"`.  
+Also note that we're requesting a Dockerfile by means of `format: "docker"`.  
+Now, you can cd into the demo directory:
 
 ```bash
 $ cd $TUTO/demos/spack_blast
@@ -55,11 +64,12 @@ $ cd $TUTO/demos/spack_blast
 And then create the Dockerfile just with:
 
 ```bash
-$ spack containerize >Dockerfile
+$ spack containerize > Dockerfile
 ```
 {: .source}
 
-More information on how to customise the creation of Dockefiles and def files with Spack can be found at the [Spack docs on container images](https://spack.readthedocs.io/en/latest/containers.html).
+More information on how to customise the creation of Dockefiles and def files with
+Spack can be found at the [Spack docs on container images](https://spack.readthedocs.io/en/latest/containers.html).
 
 ### Even more container engines and tools
 
@@ -72,7 +82,7 @@ The most interesting aspect is that recipes are written in a container engine ag
 and then HPCCM can translate them both in Dockerfiles and Singularity def files,
 allowing to simply produce container images in both formats.
 
-Another interesting feature is that HPCCM ships a set of so called *building blocks*,
+Another interesting feature is that HPCCM ships a set of so-called *building blocks*,
 *i.e.* ready to use units that install common packages in containers in an optimised way.
 For instance, these include compilers, MPI libraries, scientific libraries and a few applications.
 
