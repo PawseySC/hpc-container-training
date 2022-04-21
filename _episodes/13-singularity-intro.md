@@ -41,7 +41,7 @@ This tutorial assumes Singularity version 3.0 or higher.  Version **3.7.0 or hig
 
 ### Executing a simple command in a Singularity container
 
-For these first exercises, we're going to use a plain *Ubuntu* container image.  It's small and quick to download, and will allow use to get to know how containers work by using common Linux commands.  
+For these first exercises, we're going to use a plain *Ubuntu* container image.  It's small and quick to download, and will allow us to get familiar with containers by using common Linux commands.  
 
 Within the tutorial directory, let us cd into `demos/singularity`:
 
@@ -535,7 +535,7 @@ mondo
 
 At the time of writing, **Docker Hub** hosts a much wider selection of container images than **Sylabs Cloud**.  This includes Linux distributions, Python and R deployments, as well as a big variety of applications.
 
-Bioinformaticians should keep in mind another container registry, [Red Hat Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [BioContainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io).
+Bioinformaticians should keep in mind another container registry, [Red Hat Quay](https://quay.io) by Red Hat, that hosts thousands of applications in this domain of science.  These mostly come out of the [BioContainers](https://biocontainers.pro) project, that aims to provide automated container builds of all of the packages made available through [Bioconda](https://bioconda.github.io). 
 
 Nvidia maintains the [Nvidia GPU Cloud (NGC)](https://ngc.nvidia.com), hosting an increasing number of containerised applications optimised to run on Nvidia GPUs.
 

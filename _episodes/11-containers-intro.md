@@ -59,11 +59,11 @@ Here's an overview of what a typical workflow looks like:
 
 ### Terminology
 
-An **image** is a file (or set of files) that contains the application and all its dependencies, libraries, run-time systems, etc. required to run.  You can copy images around, upload them, download them etc.
+An **image** is a file (or set of files) that contains the application and all its dependencies, libraries, run-time systems, etc. required to run.  You can copy images around, upload them, download them etc. 
 
 A **container** is an instantiation of an image.  That is, it's a process in execution that got spawned out of an image.  You can run multiple containers from the same image, much like you might run the same application with different options or arguments.
 
-In abstract, an image corresponds to a file, a container corresponds to a process.
+In abstract, an image corresponds to a file, whereas a container corresponds to a process.
 
 A **registry** is a server application where images are stored and can be accessed by users.  It can be public (*e.g.* *Docker Hub*) or private.
 
@@ -92,7 +92,7 @@ Other container engines (not covered here) are
 
 ### Get ready for the hands-on
 
-Before we start, let us ensure we have got the required files to run the tutorials.
+Before we start, let us ensure we have the required files to run the tutorials.
 
 If you haven't done it already, download the following Github repo.  Then `cd` into it, and save the current directory into a variable named `TUTO` for later use.
 

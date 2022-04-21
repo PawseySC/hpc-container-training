@@ -160,8 +160,7 @@ CMD [ "/bin/bash" ]
 In this example, the default installed version is `4.3.0`. This can be changed
 at build time with `--build-arg ASTRO_VERSION=<ALTERNATE VERSION>`.
 
-This was easy enough.  Now, how about build reproducibility?  Or, put in other words,
-are there other packages for which we might need to keep explicit track of the version?
+This was easy enough.  Now, how about build reproducibility? Are there other packages which need the version number recorded?
 Well, when we install Python packages, most of them come with some dependency;
 in this case it's `numpy`. Let's see ways to track these when building a container.  
 We're going to see two examples, both of which rely on using a `requirements` file.
@@ -233,12 +232,12 @@ it in the image, it's not really required). We're using the additional flag
 listed in the requirements; this is a complete list of packages, as we got it
 from a real installation.
 
-Now, if we run this build repeatedly over time, we're always ending up with the
+Now, if we run this build repeatedly over time, we always end up with the
 same set of packages (and versions) in the container image!
 
 #### *pip* build reproducibility, way 2: *pip-tools*
 
-With `pip`, we've got an alternate way to generate our fully specified `requirements`
+With `pip`, we have an alternate way to generate our fully specified `requirements`
 file, that does not require running a full installation interactively.
 
 This alternate way makes use of a Python package called `pip-tools`, see its
@@ -272,8 +271,8 @@ numpy==1.19.1             # via astropy
 ### *astropy* using *conda*
 
 > ## Recommendation
-> Use pip and python*-slim as as per typical `conda` installations,
-> the list of new/updated packages is longer than with `pip` resulting in
+> Use pip and python*-slim as per typical `conda` installations.
+> The list of new/updated packages is longer than with `pip`, resulting in
 > large final image sizes. Furthermore, more work must be done to produce
 > a nice containerised environment that makes use of conda commands by setting environment
 > variables. Finally, the process of setting exact versions of packages to ensure
@@ -282,7 +281,7 @@ numpy==1.19.1             # via astropy
 > use it to install non-pythonic packages.
 {: .prereq}
 
-To conda to install `astropy`, let's start with the basic `Dockerfile.1`:
+To use conda to install `astropy`, let's start with the basic `Dockerfile.1`:
 
 ```docker
 FROM continuumio/miniconda3:4.10.3
@@ -356,7 +355,7 @@ This has a caveat: environment export in `conda` creates a YAML file that allows
 the creation of a completely new environment, including information on the environment name,
 prefix and channels (see `environment-3sep.yaml` in the directory of this example).
 
-As we just want this information to install packages in the preexisting base environment
+As we just want this information to install packages in the pre-existing base environment
 of the base image, we need to polish this file, *e.g.* using `sed`.  
 A bunch of edits will return use the final `requirements-astropy.yaml` (see example directory),
 which only contain the list of versioned packages.
@@ -385,7 +384,7 @@ functional environment.
 
 This is one more aspect worth mentioning when dealing with `conda` container images.
 
-So, `conda activate` run in a Dockerfile would not work as intended, as variable
+`conda activate` run in a Dockerfile would not work as intended, as variable
 settings would only leave inside the corresponding `RUN` layer. Then, another way
 might be to embed environment sourcing inside *profile* files, such as
 `~/.sourcerc`, `~/.profile`, or even something like `/etc/profile.d/conda.sh`.
@@ -431,7 +430,7 @@ ENV CONDA_PREFIX="/opt/conda"
 ```
 {: .source}
 
-Althtough not the case for `astropy`, some installed packages may need additional variables
+Although not the case for `astropy`, some installed packages may need additional variables
 added to the shell environment. It's possible to capture them by:
 
 ```bash
