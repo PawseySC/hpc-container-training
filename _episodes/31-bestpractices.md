@@ -12,6 +12,8 @@ objectives:
 keypoints:
 - Add lots of comments and metadata to your recipe so that it is easier to maintain
 - When possible include tests of any Parallel API the container may need to use
+- Ensure `SINGULARITYENV_*` and `SINGULARITY_BINDPATH` are set to export all required
+host environment variables and filesystems.
 ---
 
 ### How to write maintanable recipes

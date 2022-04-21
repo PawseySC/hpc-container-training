@@ -1,0 +1,14 @@
+FROM continuumio/miniconda3:4.10.3
+
+LABEL maintainer="Pawsey Supercomputing Research Centre"
+LABEL description="This is a conda container with python and astropy"
+LABEL python.version=3.9
+LABEL python.packages="astropy"
+
+ARG ASTRO_VERSION="5.0.3"
+RUN conda install -y --no-update-deps astropy==$ASTRO_VERSION \
+    # and clean conda to reduce image size \
+    && conda clean -ay
+
+CMD [ "/bin/bash" ]
+
