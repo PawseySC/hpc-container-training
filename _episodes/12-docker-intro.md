@@ -34,7 +34,7 @@ On the other hand, some features make it not ideal for HPC.  These include:
 * no support offered to interface Docker with MPI runtime, or HPC schedulers;
 * usually requires an up-to-date kernel.
 
-As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations. **is basic a word to be avoided due to implying the concept is simple for new users?**
+As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations.
 
 To get a more detailed introduction on Docker containers, see this other workshop on [Container workflows with Docker](https://pawseysc.github.io/container-workflows/).
 
