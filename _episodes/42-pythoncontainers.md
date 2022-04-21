@@ -56,6 +56,11 @@ the base image `python:3.9-slim`, and the package `astropy` as an example:
 ```docker
 FROM python:3.9-slim
 
+LABEL maintainer="Pawsey Supercomputing Research Centre"
+LABEL description="This is a container with python and astropy"
+LABEL python.version=3.9
+LABEL python.packages="astropy"
+
 RUN pip install astropy
 
 CMD [ "/bin/bash" ]
@@ -130,7 +135,7 @@ Can we reduce image size? Yes by disabling the cache used by pip:
 
 ```docker
 FROM python:3.9-slim
-
+# have removed labels to reduce amount of text.
 RUN pip --no-cache-dir install astropy
 
 CMD [ "/bin/bash" ]
@@ -463,9 +468,11 @@ is to pick one and then install the other set of utilities explicitly in the Doc
 This is when it gets handy to have a look at the Dockerfiles of our base images of interest:
 [python](https://github.com/docker-library/python/blob/master/3.9/buster/slim/Dockerfile),
 [pawsey/mpich-base](https://github.com/PawseySC/pawsey-containers/blob/master/mpich-base/Dockerfile).
-The former is 143 lines long, the latter only 64, and we actually only need the first 38 (after that, it's about installing a benchmark suite, which we don't need here) .. so looks more convenient to embed the latter on top of the former.
+The former is 143 lines long, the latter only 64 so looks more convenient to embed the latter on top of the former.
 
-As regards `mpi4py`, if we run a trial interactive installation we'll discover that this package has no further `pip` package dependencies, so we can specify its version straight in the Dockerfile.
+As regards `mpi4py`, if we run a trial interactive installation we'll discover
+that this package has no further `pip` package dependencies, so we can specify
+its version straight in the Dockerfile.
 
 Let's have a look at how the final `Dockerfile` looks like:
 
@@ -492,6 +499,7 @@ RUN apt-get update -qq \
       && rm -r /var/lib/apt/lists/*
 
 # build MPI libraries
+# neglecting for simplicity the building of benchmarking and test suite here
 RUN mkdir -p /tmp/mpich-build \
       && cd /tmp/mpich-build \
       && wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
@@ -504,6 +512,7 @@ RUN mkdir -p /tmp/mpich-build \
       && cp -p /tmp/mpich-build/mpich-${MPICH_VERSION}/examples/cpi /usr/bin/ \
       && cd / \
       && rm -rf /tmp/mpich-build
+
 # build mpi4py
 RUN pip --no-cache-dir install --no-deps mpi4py==${MPI4PY_VERSION}
 
