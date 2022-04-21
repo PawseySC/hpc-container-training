@@ -17,7 +17,7 @@ keypoints:
 ### Building a basic container
 
 Singularity can build container images in different formats.  Let's focus on the Singularity Image Format, *SIF*, which is the one typically adopted to ship production-ready containers.  
-This example is adapted from this well crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
+This example is adapted from this well-crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
 
 Let us cd into the appropriate directory:
 

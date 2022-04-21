@@ -8,7 +8,7 @@ objectives:
 - Discuss how to deploy containers and their wrappers using modules
 - Discuss how to deploy container modules using SHPC
 keypoints:
-- It is possible to devise a quite general wrapper template for containerised application
+- It is possible to devise a fairly general wrapper template for containerised applications
 - The key information to setup the wrappers is the container image, and the commands one needs to run from that image
 - It is possible to write a minimal modulefile, that allows to setup the shell environment to use containerised applications through wrappers
 - SHPC uses bash functions and automates the process of creating container modules

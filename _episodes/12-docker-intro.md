@@ -19,12 +19,12 @@ keypoints:
 
 ### Docker
 
-[Docker](https://hub.docker.com/search/?type=edition&offering=community) is a tool that allows you to easily create, deploy, and run applications on any architecture.  It does this via something called **containers**, which is a way for you to package up an application and all of its dependencies, into a single object that's easy to track, manage, share, and deploy. It has been the first container engine to get widespread popularity. It has achieved this mostly in the world of IT companies, where it can be a very effective tool in the hands of system administrators, to deploy all sorts of micro-services.  It can also be a useful engine for running containers in laptops, personal workstations, and cloud VMs.  Among its advantages:
+[Docker](https://hub.docker.com/search/?type=edition&offering=community) is a tool that allows you to easily create, deploy, and run applications on any architecture.  It does this via something called **containers**, which is a way for you to package up an application and all of its dependencies, into a single object that's easy to track, manage, share, and deploy. It was the first container engine to get widespread popularity. It has achieved this mostly in the world of IT companies, where it can be a very effective tool in the hands of system administrators, to deploy all sorts of micro-services.  It can also be a useful engine for running containers in laptops, personal workstations, and cloud VMs.  Among its advantages:
 
 * *root* execution allows for complete control and customisation;
 * *isolation* over *integration*: by default Docker runs containers in complete isolation compared to the host, with highest security.  Users are in control of plugging in additional host features, such as directories/volumes, networks, communications ports;
 * *docker-compose* to define and run multi-container applications, allowing to manage complex workflows; *e.g.* this can make Docker convenient for deploying long running services including Jupyter and RStudio servers;
-* caching of exited containers, to eventually restart them;
+* caching of exited containers, to allow users to eventually restart them;
 * layered image format allows for caching of container building steps during build time, reducing development time.
 
 On the other hand, some features make it not ideal for HPC.  These include:
@@ -34,7 +34,7 @@ On the other hand, some features make it not ideal for HPC.  These include:
 * no support offered to interface Docker with MPI runtime, or HPC schedulers;
 * usually requires an up-to-date kernel.
 
-As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations.
+As you might encounter Docker in your container journey, let's have a quick look at how the syntax looks like for the most basic operations. **is basic a word to be avoided due to implying the concept is simple for new users?**
 
 To get a more detailed introduction on Docker containers, see this other workshop on [Container workflows with Docker](https://pawseysc.github.io/container-workflows/).
 
@@ -184,7 +184,7 @@ bitnami/tensorflow-inception        Bitnami Docker Image for TensorFlow Inceptio
 
 ### Running an interactive command in an image ###
 
-Docker has the option to run containers interactively.  While this is convenient (and useful for debugging), in general you shouldn't use this model as your standard way of working with containers.  To run interactively, we just need to use the `-i` and `-t` flags, or `-it` for brevity:
+Docker has the option to run containers interactively.  While this is convenient (and useful for debugging), in general you shouldn't use this model as your standard way of working with containers.  To run interactively, we use the `-i` and `-t` flags, or `-it` for brevity:
 
 ```bash
 $ docker run -i -t ubuntu /bin/bash

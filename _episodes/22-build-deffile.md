@@ -4,7 +4,7 @@ teaching: 15
 exercises: 5
 questions:
 objectives:
-- Discuss what a definition file is
+- Discuss definition files
 - Learn the basic syntax of a definition file
 - Discuss some useful base container images
 keypoints:
@@ -14,12 +14,12 @@ keypoints:
 ---
 
 > ## Before you start
-> Although Singularity builds offer some interesting advantages, right now the
-> Docker process is recommended due to its compatibility and use of layers.
-> We therefore recommand familiarizing yourself with Dockerfile syntax rather than
-> the recipe syntax used by Singularity. Only proceed if you know that you will
-> be building container images using singularity rather than building with docker
-> and using `singularity pull` from a docker repository to generate a SIF file.
+> Although building containers with Singularity offers some interesting advantages, right now building with 
+> Docker is recommended due to its wide compatibility and use of layers.
+> We therefore recommend familiarising yourself with Dockerfile syntax rather than
+> the Singularity recipe syntax. Only proceed if you know that you will
+> be building container images using Singularity rather than building with Docker
+> and then using `singularity pull` from a docker repository to generate a SIF file.
 {: .prereq}
 
 ### What is a def file?
@@ -33,7 +33,7 @@ convention for def files, they are often characterised by the suffix `.def`.
 ### Core syntax of a definition file
 
 We're going to have a closer look at the def file that was used in the introductory episode on building images.  If you've already gone through that episode, you'll be able to use the newly created image to test some new Singularity commands.  
-This example is adapted from this well crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
+This example is adapted from this well-crafted [Singularity Tutorial](https://github.com/ArangoGutierrez/Singularity-tutorial).
 
 Let us cd into the appropriate directory:
 
@@ -70,7 +70,7 @@ From: ubuntu:18.04
 
 The first line in the *def file* is `Bootstrap: docker`.  
 This tells Singularity how the image has to be initialised. `docker` means that we are going to start with a base image from Docker Hub.  Another common way to bootstrap is using `library`, which will grab an image from the Sylabs Cloud.  The image is specified in the next line, in this case `From: ubuntu:18.04`.  
-Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the former version has got a bit of a richer, more useful configuration.
+Note how we started from Ubuntu 18.04 in Docker Hub, not Sylabs Cloud, as the former version has a richer, more useful configuration.
 
 Next is a section that starts with the header `%post`.  This is basically a sequence of commands to be executed to install packages in the image, in essence the same commands you would use for installation in a Linux box.  Here we are ensuring we have an up-to-date list of packages, and then we are installing three Linux utilities.
 
@@ -187,7 +187,7 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
 > * `> singularity exec <image> <cmd>`
 > * `singularity run <image>` (default command only)
 >
-> Now, most software packages provide multiple executables, depending on specific functions to be used, or tasks to be run.  There are some ill defined aspects here.  
+> Now, most software packages provide multiple executables, depending on specific functions to be used, or tasks to be run.  There are some ill-defined aspects here.  
 > First, what type of general tip can we suggest for picking the *default* command to be associated with `run`?  It's hard to tell.  
 > Second, this would result in an inconsistent user experience, where one command in an image is executed using `run`, and all the others via `exec`.  
 >
@@ -197,7 +197,7 @@ $ singularity run -B $TUTO/_episodes lolcow.sif
 
 ### Advanced build options
 
-The def file specification has a number of other interesting features.  To know more about them you can visit the [Singularity docs on def files](https://singularity.hpcng.org/user-docs/3.5/definition_files.html).
+The def file specification has a number of other interesting features.  To learn more about them you can visit the [Singularity docs on def files](https://singularity.hpcng.org/user-docs/3.5/definition_files.html).
 
 1. In the episode on GUI enabled web applications we'll see how to use `%startscript` to configure the behaviour of containers running in background as **long running web servers**.
 

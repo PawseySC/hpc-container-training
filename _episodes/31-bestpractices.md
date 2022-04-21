@@ -26,9 +26,9 @@ Always keep in mind that writing a Dockerfile is almost an art, which you can re
 > 3. Ensure any security information is ephemeral, that is used and the deleted within
 > a single `RUN` command.
 > 4. Clean the installation process, removing any build stages and caches.
-> 5. Abstract package versions, if you can
-> 6. Consider build reproducibility, if you can
-> 8. Consider adding runtime tests, if you can
+> 5. Abstract package versions, if possible
+> 6. Consider build reproducibility, if possible
+> 8. Consider adding runtime tests, if possible
 > 7. Know and set some useful environment variables
 {: .checklist}
 
@@ -106,7 +106,7 @@ RUN apt-get -y install lolcats
 ```
 {: .source}
 
-The conatiner also contains all the files need to run `apt-get` and recently cached files.
+The container also contains all the files need to run `apt-get` and recently cached files.
 These are unlikely to be used when running the container so the recipe should also remove them
 once they have been used.
 ```docker
@@ -187,7 +187,7 @@ ENV LANG="C.UTF-8" LC_ALL="C.UTF-8"
 {: .source}
 
 These variables are used to specify the language localisation, or *locale*, to the value `C.UTF-8` in this case.  
-Leaving this undefined can result, for some programs, in warnings or even in unintended behaviours (both at build and run time).
+Leaving this undefined can result in warnings or even in unintended behaviours for some programs (both at build and run time).
 
 #### Including runtime tests
 
@@ -284,9 +284,9 @@ Such a script may even be a useful default command.
 
 ### Portability vs Performance
 
-Some containerized applications are not computational intensive applications and must
+Some containerized applications are not computationally intensive applications and must
 run on a variety of systems. In fact containers were conceived with reproducibility and portability
-as core properties since most initial applications were service oriented and needed to be
+as core properties since most initial applications were service-oriented and needed to be
 easily deployable.
 
 However, there are cases where a container does not need to run on all systems,
