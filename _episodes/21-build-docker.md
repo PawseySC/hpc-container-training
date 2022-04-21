@@ -21,14 +21,14 @@ keypoints:
 
 ### Why using Docker for container builds?
 
-Over the whole of this tutorial we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
+Over the entirity of this tutorial, we're proposing Singularity as the principal tool to handle and run containerised applications in HPC.  Do we really need to extend our toolkit to include [Docker](https://hub.docker.com/search/?type=edition&offering=community)?
 
-At present, both tools, Docker and Singularity (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to this question, here are some of the advantages when building with one or the other tool.
+At present, both tools, Docker and Singularity (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to the question of Docker's utility, here are some of the advantages when building with one or the other tool.
 
 > ## Advantages of each container engine
 > #### Docker
 > * Image format can be run by all existing container engines, including Singularity.
-> * Docker uses Layered image format compliant with the *Open Containers Initiative* (OCI) allows caching, for reduced build time during prototyping
+> * Docker uses _layered_ image format compliant with the *Open Containers Initiative* (OCI) allows caching, for reduced build time during prototyping
 > and development.
 >   * Each build command in the recipe file results in the creation of a distinct image layer,
 > which are cached during the build process. Repeated build attempts that use the same layers will exploit the cache
@@ -49,7 +49,7 @@ Docker is preferred in most situations due to its ability to layered format and 
 
 ### Building the container image with Docker
 
-Let's cd into the relevant demo directory:
+Let's `cd` into the relevant demo directory:
 
 ```bash
 $ cd $TUTO/demos/lolcow_docker
@@ -133,7 +133,7 @@ CMD fortune | cowsay | lolcat
 ```
 {: .source}
 
-The directory where the the Dockerfile is stored is the so called the Docker **build context**.  Docker will include files in this directory in the build process and in the final image.  As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build, even none if possible.
+The directory where the the Dockerfile is stored is the so called the Docker **build context**.  Docker will include files in this directory in the build process and in the final image.  As a by-product, this will make the build process longer and the image larger, so that we want to include only those strictly required for the build.
 
 Let's comment on the Docker instructions that appear in this Dockerfile.
 
@@ -154,7 +154,7 @@ More information on the Dockerfile syntax can be found at the [Dockerfile refere
 Note how the `RUN` instruction above is used to execute a sequence of commands to update the list of available packages and install a set of Linux packages.  
 We have concatenated all these commands in one using the `&&` linux operator, and then the `\` symbol to break them into multiple lines for readability.
 
-We could have used one `RUN` instruction per command, so why concatenating instead?  
+We could have used one `RUN` instruction per command, so why concatenate instead?  
 Well, each `RUN` creates a distinct **layer** in the final image, increasing its size.  It is a good practice to use as few layers, and thus `RUN` instructions, as possible, to keep the image size smaller.
 
 
