@@ -236,7 +236,7 @@ cowsay     fortune     lolcat     lolcow
 To get ready for this example, let us also pull the BLAST image there:
 
 ```bash
-$ singularity pull --dir apps/lolcow/1.0.0/bin ???
+$ singularity pull --dir apps/lolcow/1.0.0/bin
 ```
 {: .source}
 
