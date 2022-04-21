@@ -1,0 +1,11 @@
+FROM python:3.9-slim
+
+LABEL maintainer="Pawsey Supercomputing Research Centre"
+LABEL description="This is a container with python and astropy"
+LABEL python.version=3.9
+LABEL python.packages="astropy"
+
+RUN pip install astropy
+
+CMD [ "/bin/bash" ]
+
