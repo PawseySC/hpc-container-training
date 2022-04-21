@@ -15,9 +15,9 @@ keypoints:
 ### Spack
 
 > ## Pawsey systems
-> Pawsey uses `spack` to install software, since this handles dependencies and naturally
+> Pawsey uses `Spack` to install software, since this handles dependencies and naturally
 > ensures build time reproducibility. We recommend users familarize themselves
-> with the overall process of using spack to produce a docker container.
+> with the overall process of using Spack to produce a docker container.
 {: .prereq}
 
 [Spack](https://spack.io) is a package manager for HPC, with the main purpose of
@@ -28,7 +28,7 @@ It has many features and functionalities, with a relatively concise command inte
 
 Interestingly, Spack can also be used to automate the generation of Dockerfiles
 and Singularity def files.  In this regard, compared to other tools it easily allows
- to optimise the container build for a given CPU micro-architecture.  Thus, it can
+ optimising the container build for a given CPU micro-architecture.  Thus, it can
   enable to reproducibly generate collections of container images for a given
   application, enforcing both portability and performance.
 
@@ -64,7 +64,7 @@ spack:
 ```
 {: .source}
 
-Without willing to provide an exhaustive explanation of this file, note how the
+Without providing an exhaustive explanation of this file, note how the
 request for BLAST 2.9.0 optimised for Haswell is stated: `blast-plus@2.9.0 target="haswell"`.  
 Also note that we're requesting a Dockerfile by means of `format: "docker"`.  
 Now, you can cd into the demo directory:
