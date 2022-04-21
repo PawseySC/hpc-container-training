@@ -15,9 +15,9 @@ keypoints:
 
 ### Let's run a MPI-enabled application in a container!
 
-We're going to start this episode with actually running a practical example, and then discuss the way this all works later on. We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
+We're going to start this episode with actually running a practical example, and then discuss the way this works later on. We're using OpenFoam, a widely popular package for Computational Fluid Dynamics simulations, which is able to massively scale in parallel architectures up to thousands of processes, by leveraging an MPI library.  The sample inputs come straight from the OpenFoam installation tree, namely `$FOAM_TUTORIALS/incompressible/pimpleFoam/LES/periodicHill/steadyState/`.
 
-First, cd into a demo directory and download the OpenFoam (computational fluid dynamics simulation code) container image from [quay.io](https://quay.io/repository/pawsey/openfoam?tab=info):
+First, cd into a demo directory and download the OpenFoam container image from [quay.io](https://quay.io/repository/pawsey/openfoam?tab=info):
 
 ```bash
 $ cd $TUTO/demo/openfoam/
