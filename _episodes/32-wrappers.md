@@ -51,7 +51,7 @@ image_dir="."
 image_name="lolcow.sif"
 
 # define the command
-cmd="blastp"
+cmd="cowsay"
 
 # and grab all commands passed to the script via the command line
 args="$@"
@@ -179,8 +179,15 @@ singularity exec <IMAGE> <CMD> <ARGS>
 This will also work with MPI containers and Slurm, as the corresponding syntax does not impact such form:
 
 ```bash
-mpirun -n <NNODES> singularity exec <IMAGE> <CMD> <ARGS>
-srun singularity exec <IMAGE> <CMD> <ARGS>
+mpirun -n <NTASKS> singularity exec <IMAGE> <CMD> <ARGS>
+srun -n <NTASKS> singularity exec <IMAGE> <CMD> <ARGS>
+```
+{: .source}
+
+So that now things become :
+```bash
+mpirun -n <NTASKS> <CMD> <ARGS>
+srun -n <NTASKS> <CMD> <ARGS>
 ```
 {: .source}
 
