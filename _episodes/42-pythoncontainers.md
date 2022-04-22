@@ -79,7 +79,7 @@ $ docker build -t p:1 -f Dockerfile.1 .
 ```
 {: .source}
 
-> ## Standard output produced by Docker
+> #### Output from Docker build
 > ```
 > Step 1/3 : FROM python:3.9-slim
 > 3.9-slim: Pulling from library/python

@@ -73,7 +73,7 @@ Adding the prefix `<Your Docker Hub account>/` to the image name is also optiona
 
 The complete format for the image name looks like: `<Your Docker Hub account ^>/<Image name>:<Image tag ^>`. `^`These are optional.
 
-> ## Output from build
+> #### Output from Docker build
 > ```
 > Sending build context to Docker daemon  2.048kB
 > Step 1/7 : FROM ubuntu:18.04
