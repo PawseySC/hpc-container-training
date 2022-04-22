@@ -26,7 +26,7 @@ Over the entirity of this tutorial, we're proposing Singularity as the principal
 At present, both tools, Docker and Singularity (and its successor Apptainer), require root privileges for building, implying that this step cannot be performed on HPC systems. Both require access to a machine where a user has administrative privileges. However, each tool has a different build process. To better inform an answer to the question of Docker's utility, here are some of the advantages when building with one or the other tool.
 
 > ## Advantages of each container engine
-> #### Docker
+> ### Docker
 > * Image format can be run by all existing container engines, including Singularity.
 > * Docker uses _layered_ image format compliant with the *Open Containers Initiative* (OCI) allows caching, for reduced build time during prototyping
 > and development.
@@ -36,7 +36,7 @@ At present, both tools, Docker and Singularity (and its successor Apptainer), re
 >   * A drawback to this approach is shipping a container image is not straightforward
 > and requires either relying on a public registry, or compressing the image in a *tar* archive.
 >
-> #### Singularity
+> ### Singularity
 > * Unambiguous container usage modes, via distinct keywords: `exec`, `shell`, `run`, `instance` (see episode on web applications).
 > * Powerful ways of defining shell environment (see [Singularity docs on Environment and Metadata](https://singularity.hpcng.org/user-docs/3.5/environment_and_metadata.html));
 > * Ability to sign/verify images for improved security.
