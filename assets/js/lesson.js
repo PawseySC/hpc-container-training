@@ -39,15 +39,15 @@ $(".output-extra").click(function(event) {
     var trigger = $(event.target).has(".fold-unfold").size() > 0
                || $(event.target).filter(".fold-unfold").size() > 0;
     if (trigger) {
-        $(">*:not(h2)", this).toggle(400);
-        $(">h2>span.fold-unfold", this).toggleClass("glyphicon-collapse-down glyphicon-collapse-up");
+        $(">*:not(h4)", this).toggle(400);
+        $(">h4>span.fold-unfold", this).toggleClass("glyphicon-collapse-down glyphicon-collapse-up");
         event.stopPropagation();
     }
 });
 $(".output-extra").each(function() {
-    $(">*:not(h2)", this).toggle();
-    var h2 = $("h2:first", this);
-    h2.append("<span class='fold-unfold glyphicon glyphicon-collapse-down'></span>");
+    $(">*:not(h4)", this).toggle();
+    var h4 = $("h4:first", this);
+    h4.append("<span class='fold-unfold glyphicon glyphicon-collapse-down'></span>");
 });
 
 // Handle searches.
