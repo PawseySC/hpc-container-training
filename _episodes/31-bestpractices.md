@@ -1,5 +1,5 @@
 ---
-title: "Best Practices"
+title: "Best practices"
 teaching: 15
 exercises: 10
 questions:

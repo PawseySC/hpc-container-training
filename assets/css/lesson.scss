@@ -23,6 +23,8 @@ $color-objectives:  #daee84 !default;
 $color-prereq:      #9cd6dc !default;
 $color-solution:    #ded4b9 !default;
 $color-testimonial: #fc8dc1 !default;
+$color-bonus:       #3ce78d !default;
+$color-output-extra:#b5b5b5 !default;
 
 //----------------------------------------
 // Specialized code blocks.
@@ -121,6 +123,8 @@ $codeblock-padding: 5px !default;
 .prereq{ @include bkSetup($color-prereq, "\e124"); }
 .solution{ @include bkSetup($color-solution, "\e105"); }
 .testimonial{ @include bkSetup($color-testimonial, "\e143"); }
+.bonus{ @include bkSetup($color-bonus, "\e086"); }
+.output-extra { @include bkSetup($color-output-extra, "\e045"); }
 
 //----------------------------------------
 // Override Bootstrap settings.

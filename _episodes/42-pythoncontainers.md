@@ -79,52 +79,54 @@ $ docker build -t p:1 -f Dockerfile.1 .
 ```
 {: .source}
 
-```
-Step 1/3 : FROM python:3.9-slim
-3.9-slim: Pulling from library/python
-1fe172e4850f: Pull complete
-caf521ccaac6: Pull complete
-3ead6fa29328: Pull complete
-5c2a1cbceb83: Pull complete
-a8d5f1318db7: Pull complete
-Digest: sha256:ba3b77ddbc953cdb8d998b2052088d4af4b8805805e5b01975a05af4e19855ea
-Status: Downloaded newer image for python:3.9-slim
- ---> 8c7051081f58
-Step 2/3 : RUN pip install astropy
- ---> Running in 1873f952be21
- Collecting astropy
-   Downloading astropy-5.0.4-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (11.1 MB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.1/11.1 MB 66.0 MB/s eta 0:00:00
- Collecting packaging>=19.0
-   Downloading packaging-21.3-py3-none-any.whl (40 kB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 40.8/40.8 KB 2.8 MB/s eta 0:00:00
- Collecting PyYAML>=3.13
-   Downloading PyYAML-6.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (661 kB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 661.8/661.8 KB 15.0 MB/s eta 0:00:00
- Collecting numpy>=1.18
-   Downloading numpy-1.22.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.8 MB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.8/16.8 MB 36.7 MB/s eta 0:00:00
- Collecting pyerfa>=2.0
-   Downloading pyerfa-2.0.0.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (742 kB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 742.9/742.9 KB 20.8 MB/s eta 0:00:00
- Collecting pyparsing!=3.0.5,>=2.0.2
-   Downloading pyparsing-3.0.8-py3-none-any.whl (98 kB)
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 98.5/98.5 KB 6.4 MB/s eta 0:00:00
- Installing collected packages: PyYAML, pyparsing, numpy, pyerfa, packaging, astropy
- Successfully installed PyYAML-6.0 astropy-5.0.4 numpy-1.22.3 packaging-21.3 pyerfa-2.0.0.1 pyparsing-3.0.8
- Removing intermediate container d80db8640631
-  ---> bc9e0ebcf0b9
- Successfully built bc9e0ebcf0b9
- Successfully tagged p:1
-  ---> 6e8eaaaa85dc
-Step 3/3 : CMD [ "/bin/bash" ]
-  ---> Running in cba660461191
-Removing intermediate container cba660461191
-  ---> 06cc7bee12cd
-Successfully built 06cc7bee12cd
-Successfully tagged p:1
-```
-{: .output}
+> ## Standard output produced by Docker
+> ```
+> Step 1/3 : FROM python:3.9-slim
+> 3.9-slim: Pulling from library/python
+> 1fe172e4850f: Pull complete
+> caf521ccaac6: Pull complete
+> 3ead6fa29328: Pull complete
+> 5c2a1cbceb83: Pull complete
+> a8d5f1318db7: Pull complete
+> Digest: sha256:ba3b77ddbc953cdb8d998b2052088d4af4b8805805e5b01975a05af4e19855ea
+> Status: Downloaded newer image for python:3.9-slim
+>  ---> 8c7051081f58
+> Step 2/3 : RUN pip install astropy
+>  ---> Running in 1873f952be21
+>  Collecting astropy
+>    Downloading astropy-5.0.4-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (11.1 MB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.1/11.1 MB 66.0 MB/s eta 0:00:00
+>  Collecting packaging>=19.0
+>    Downloading packaging-21.3-py3-none-any.whl (40 kB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 40.8/40.8 KB 2.8 MB/s eta 0:00:00
+>  Collecting PyYAML>=3.13
+>    Downloading PyYAML-6.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (661 kB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 661.8/661.8 KB 15.0 MB/s eta 0:00:00
+>  Collecting numpy>=1.18
+>    Downloading numpy-1.22.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.8 MB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.8/16.8 MB 36.7 MB/s eta 0:00:00
+>  Collecting pyerfa>=2.0
+>    Downloading pyerfa-2.0.0.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (742 kB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 742.9/742.9 KB 20.8 MB/s eta 0:00:00
+>  Collecting pyparsing!=3.0.5,>=2.0.2
+>    Downloading pyparsing-3.0.8-py3-none-any.whl (98 kB)
+>       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 98.5/98.5 KB 6.4 MB/s eta 0:00:00
+>  Installing collected packages: PyYAML, pyparsing, numpy, pyerfa, packaging, astropy
+>  Successfully installed PyYAML-6.0 astropy-5.0.4 numpy-1.22.3 packaging-21.3 pyerfa-2.0.0.1 pyparsing-3.0.8
+>  Removing intermediate container d80db8640631
+>   ---> bc9e0ebcf0b9
+>  Successfully built bc9e0ebcf0b9
+>  Successfully tagged p:1
+>   ---> 6e8eaaaa85dc
+> Step 3/3 : CMD [ "/bin/bash" ]
+>   ---> Running in cba660461191
+> Removing intermediate container cba660461191
+>   ---> 06cc7bee12cd
+> Successfully built 06cc7bee12cd
+> Successfully tagged p:1
+> ```
+> {: .output}
+{: .output-extra}
 
 A couple of notes here:
 * The version of `astropy` version depends on the version of pip. Here `5.0.4` is installed.
@@ -281,169 +283,171 @@ numpy==1.19.1             # via astropy
 > use it to install non-pythonic packages.
 {: .prereq}
 
-To use conda to install `astropy`, let's start with the basic `Dockerfile.1`:
-
-```docker
-FROM continuumio/miniconda3:4.10.3
-
-ARG ASTRO_VERSION="5.0.3"
-RUN conda install -y --no-update-deps astropy==$ASTRO_VERSION \
-    # and clean conda to reduce image size \
-    && conda clean -ay
-```
-{: .source}
-
-First, we're starting from the `continuumio/miniconda3:4.10.3` image; have a look
-at the [Dockerfile](https://github.com/ContinuumIO/docker-images/blob/master/miniconda3/debian/Dockerfile)
-if you want.
-
-Then, note how we're using the `conda install` flag `--no-update-deps` to ask
-`conda` not to update any package that ships with the base image.  This is intended
-for better build reproducibility, in that these packages should be defined only
-by the choice of the base image itself.  However, unfortunately at the time of
-writing this flag does not seem to work as intended.
-
-We can build the image with:
-
-```bash
-$ docker build -t c:1 -f Dockerfile.1 .
-```
-{: .source}
-
-The corresponding image is 1.47 GB large, significantly larger than that built using python*-slim.
-
-Now, let's focus on build reproducibility, taking again an approach using a `requirements` file.
-Let's start with our specification, `requirements.in`:
-
-```
-astropy==5.0.3
-```
-{: .source}
-
-Now, similar to the *pip* case, let's start an interactive session:
-
-```bash
-$ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
-```
-{: .source}
-
-And run this preparation script, `prepare-conda.sh`:
-
-```bash
-#!/bin/bash
-
-# run this from the miniconda3 container
-# docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
-
-conda install --no-update-deps -y  --file requirements.in
-
-REQ_LABEL="astropy"
-ENV_FILE="environment-${REQ_LABEL}.yaml"
-conda env export >${ENV_FILE}
-
-REQ_FILE="requirements-${REQ_LABEL}.yaml"
-cp $ENV_FILE $REQ_FILE
-sed -i -n '/dependencies/,/prefix/p' $REQ_FILE
-sed -i -e '/dependencies:/d' -e '/prefix:/d' $REQ_FILE
-sed -i 's/ *- //g' $REQ_FILE
-```
-{: .source}
-
-Here we're running a trial installation using `conda install --file requirements.in`.
-Then we can export the versioned packages in the active environment using `conda env export`.  
-This has a caveat: environment export in `conda` creates a YAML file that allows
-the creation of a completely new environment, including information on the environment name,
-prefix and channels (see `environment-3sep.yaml` in the directory of this example).
-
-As we just want this information to install packages in the pre-existing base environment
-of the base image, we need to polish this file, *e.g.* using `sed`.  
-A bunch of edits will return use the final `requirements-astropy.yaml` (see example directory),
-which only contain the list of versioned packages.
-This is the requirements file we can use in the Dockerfile, see `Dockerfile.3`:
-
-```docker
-FROM continuumio/miniconda3:4.10.3
-
-ARG REQ_FILE="requirements-astropy.yaml"
-ADD requirements.in /
-ADD $REQ_FILE /requirements.yaml
-
-RUN conda install -y --no-deps --file /requirements.yaml \
-    # and clean conda to reduce image size \
-    && conda clean -ay
-```
-{: .source}
-
-Note how we're now using the option `conda install --no-deps`, to tell `conda`
-not to consider any package dependency for installation, but just those packages
-in the requirements list.  In principle, this is dangerous and can lead to broken
-environments, but here we're safe as we obtained this list by exporting a real,
-functional environment.
-
-#### Shell variables and *conda* environment settings
-
-This is one more aspect worth mentioning when dealing with `conda` container images.
-
-`conda activate` run in a Dockerfile would not work as intended, as variable
-settings would only leave inside the corresponding `RUN` layer. Then, another way
-might be to embed environment sourcing inside *profile* files, such as
-`~/.sourcerc`, `~/.profile`, or even something like `/etc/profile.d/conda.sh`.
-However, these files are only sourced when `bash` is launched, so for instance
-not when running a `python` execution directly.
-Also, files under home, `~/`, would not work with Singularity: Docker home is *root*'s home,
-whereas Singularity runs as the host user.
-
-In summary, the most robust way to ensure shell variables for the conda environment
-are set is to set them explicitly in the Dockerfile using `ENV` instructions.
-
-In terms of general conda variables, the `continuumio` base images all set a
-modified `PATH` variable, so that conda and binaries in the base environment are
-found (see [Dockerfile](https://github.com/ContinuumIO/docker-images/blob/master/miniconda3/debian/Dockerfile)).
-Explicitly setting also the `CONDA_PREFIX` is not done in the base image, so it
-does not hurt doing it in our Dockerfile, see `Dockerfile.4`:
-
-```docker
-FROM continuumio/miniconda3:4.10.3
-
-ARG REQ_FILE="requirements-astropy.yaml"
-ADD requirements.in /
-ADD $REQ_FILE /requirements.yaml
-
-RUN conda install -y --no-deps --file /requirements.yaml \
-    # and clean conda to reduce image size \
-    && conda clean -ay
-
-# conda activate is not robustly usable in a container.
-# then, go for an environment check in a test container,
-# to see if you need to set any package specific variables in the container:
-#
-# run this from the miniconda3 container
-# docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
-#
-# env >before
-# conda install <..>
-# env >after
-# diff before after
-
-# this one is always good to have
-ENV CONDA_PREFIX="/opt/conda"
-```
-{: .source}
-
-Although not the case for `astropy`, some installed packages may need additional variables
-added to the shell environment. It's possible to capture them by:
-
-```bash
-$ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
-$ env >before # from within the container
-$ conda install <..>
-$ env >after
-$ diff before after
-```
-{: .source}
-
-If there are any spare variables, it's advisable to review them, and include relevant
-ones in the Dockerfile using `ENV` instructions.
+> ## For more info expand
+> To use conda to install `astropy`, let's start with the basic `Dockerfile.1`:
+>
+> ```docker
+> FROM continuumio/miniconda3:4.10.3
+>
+> ARG ASTRO_VERSION="5.0.3"
+> RUN conda install -y --no-update-deps astropy==$ASTRO_VERSION \
+>     # and clean conda to reduce image size \
+>     && conda clean -ay
+> ```
+> {: .source}
+>
+> First, we're starting from the `continuumio/miniconda3:4.10.3` image; have a look
+> at the [Dockerfile](https://github.com/ContinuumIO/docker-images/blob/master/miniconda3/debian/Dockerfile)
+> if you want.
+>
+> Then, note how we're using the `conda install` flag `--no-update-deps` to ask
+> `conda` not to update any package that ships with the base image.  This is intended
+> for better build reproducibility, in that these packages should be defined only
+> by the choice of the base image itself.  However, unfortunately at the time of
+> writing this flag does not seem to work as intended.
+>
+> We can build the image with:
+>
+> ```bash
+> $ docker build -t c:1 -f Dockerfile.1 .
+> ```
+> {: .source}
+>
+> The corresponding image is 1.47 GB large, significantly larger than that built using python*-slim.
+>
+> Now, let's focus on build reproducibility, taking again an approach using a `requirements` file.
+> Let's start with our specification, `requirements.in`:
+>
+> ```
+> astropy==5.0.3
+> ```
+> {: .source}
+>
+> Now, similar to the *pip* case, let's start an interactive session:
+>
+> ```bash
+> $ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
+> ```
+> {: .source}
+>
+> And run this preparation script, `prepare-conda.sh`:
+>
+> ```bash
+> #!/bin/bash
+>
+> # run this from the miniconda3 container
+> # docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
+>
+> conda install --no-update-deps -y  --file requirements.in
+>
+> REQ_LABEL="astropy"
+> ENV_FILE="environment-${REQ_LABEL}.yaml"
+> conda env export >${ENV_FILE}
+>
+> REQ_FILE="requirements-${REQ_LABEL}.yaml"
+> cp $ENV_FILE $REQ_FILE
+> sed -i -n '/dependencies/,/prefix/p' $REQ_FILE
+> sed -i -e '/dependencies:/d' -e '/prefix:/d' $REQ_FILE
+> sed -i 's/ *- //g' $REQ_FILE
+> ```
+> {: .source}
+>
+> Here we're running a trial installation using `conda install --file requirements.in`.
+> Then we can export the versioned packages in the active environment using `conda env export`.  
+> This has a caveat: environment export in `conda` creates a YAML file that allows
+> the creation of a completely new environment, including information on the environment name,
+> prefix and channels (see `environment-3sep.yaml` in the directory of this example).
+>
+> As we just want this information to install packages in the pre-existing base environment
+> of the base image, we need to polish this file, *e.g.* using `sed`.  
+> A bunch of edits will return use the final `requirements-astropy.yaml` (see example directory),
+> which only contain the list of versioned packages.
+> This is the requirements file we can use in the Dockerfile, see `Dockerfile.3`:
+>
+> ```docker
+> FROM continuumio/miniconda3:4.10.3
+>
+> ARG REQ_FILE="requirements-astropy.yaml"
+> ADD requirements.in /
+> ADD $REQ_FILE /requirements.yaml
+>
+> RUN conda install -y --no-deps --file /requirements.yaml \
+>     # and clean conda to reduce image size \
+>     && conda clean -ay
+> ```
+> {: .source}
+>
+> Note how we're now using the option `conda install --no-deps`, to tell `conda`
+> not to consider any package dependency for installation, but just those packages
+> in the requirements list.  In principle, this is dangerous and can lead to broken
+> environments, but here we're safe as we obtained this list by exporting a real,
+> functional environment.
+>
+> #### Shell variables and *conda* environment settings
+>
+> This is one more aspect worth mentioning when dealing with `conda` container images.
+>
+> `conda activate` run in a Dockerfile would not work as intended, as variable
+> settings would only leave inside the corresponding `RUN` layer. Then, another way
+> might be to embed environment sourcing inside *profile* files, such as
+> `~/.sourcerc`, `~/.profile`, or even something like `/etc/profile.d/conda.sh`.
+> However, these files are only sourced when `bash` is launched, so for instance
+> not when running a `python` execution directly.
+> Also, files under home, `~/`, would not work with Singularity: Docker home is *root*'s home,
+> whereas Singularity runs as the host user.
+>
+> In summary, the most robust way to ensure shell variables for the conda environment
+> are set is to set them explicitly in the Dockerfile using `ENV` instructions.
+>
+> In terms of general conda variables, the `continuumio` base images all set a
+> modified `PATH` variable, so that conda and binaries in the base environment are
+> found (see [Dockerfile](https://github.com/ContinuumIO/docker-images/blob/master/miniconda3/debian/Dockerfile)).
+> Explicitly setting also the `CONDA_PREFIX` is not done in the base image, so it
+> does not hurt doing it in our Dockerfile, see `Dockerfile.4`:
+>
+> ```docker
+> FROM continuumio/miniconda3:4.10.3
+>
+> ARG REQ_FILE="requirements-astropy.yaml"
+> ADD requirements.in /
+> ADD $REQ_FILE /requirements.yaml
+>
+> RUN conda install -y --no-deps --file /requirements.yaml \
+>     # and clean conda to reduce image size \
+>     && conda clean -ay
+>
+> # conda activate is not robustly usable in a container.
+> # then, go for an environment check in a test container,
+> # to see if you need to set any package specific variables in the container:
+> #
+> # run this from the miniconda3 container
+> # docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
+> #
+> # env >before
+> # conda install <..>
+> # env >after
+> # diff before after
+>
+> # this one is always good to have
+> ENV CONDA_PREFIX="/opt/conda"
+> ```
+> {: .source}
+>
+> Although not the case for `astropy`, some installed packages may need additional variables
+> added to the shell environment. It's possible to capture them by:
+>
+> ```bash
+> $ docker run --rm -it -v $(pwd):/data -w /data continuumio/miniconda3:4.10.3 bash
+> $ env >before # from within the container
+> $ conda install <..>
+> $ env >after
+> $ diff before after
+> ```
+> {: .source}
+>
+> If there are any spare variables, it's advisable to review them, and include relevant
+> ones in the Dockerfile using `ENV` instructions.
+{: .bonus}
 
 ### Python with MPI: *mpi4py*
 

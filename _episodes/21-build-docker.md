@@ -73,43 +73,43 @@ Adding the prefix `<Your Docker Hub account>/` to the image name is also optiona
 
 The complete format for the image name looks like: `<Your Docker Hub account ^>/<Image name>:<Image tag ^>`. `^`These are optional.
 
-This is the output of our build:
-
-```
-Sending build context to Docker daemon  2.048kB
-Step 1/7 : FROM ubuntu:18.04
- ---> 775349758637
-Step 2/7 : LABEL maintainer="Pawsey Supercomputing Centre"
- ---> Running in 91c109dfd5ba
-Removing intermediate container 91c109dfd5ba
- ---> 361490204a2c
-Step 3/7 : RUN apt-get -y update &&   apt-get -y install fortune cowsay lolcat
- ---> Running in 4543b6bb99f1
-
-[..]
-
-Removing intermediate container 4543b6bb99f1
- ---> 7958a569068f
-Step 4/7 : ENV PATH=/usr/games:$PATH
- ---> Running in 86282799c41f
-Removing intermediate container 86282799c41f
- ---> 3ffdfe179e34
-Step 5/7 : VOLUME /data
- ---> Running in f93de5446caa
-Removing intermediate container f93de5446caa
- ---> 9c174e36bf3a
-Step 6/7 : WORKDIR /data
- ---> Running in eed67d591239
-Removing intermediate container eed67d591239
- ---> 36cc09b2c59b
-Step 7/7 : CMD fortune | cowsay | lolcat
- ---> Running in 87a464d2ee67
-Removing intermediate container 87a464d2ee67
- ---> 3c62a0f2e06e
-Successfully built 3c62a0f2e06e
-Successfully tagged lolcow:1Nov19
-```
-{: .output}
+> ## Output from build
+> ```
+> Sending build context to Docker daemon  2.048kB
+> Step 1/7 : FROM ubuntu:18.04
+>  ---> 775349758637
+> Step 2/7 : LABEL maintainer="Pawsey Supercomputing Centre"
+>  ---> Running in 91c109dfd5ba
+> Removing intermediate container 91c109dfd5ba
+>  ---> 361490204a2c
+> Step 3/7 : RUN apt-get -y update &&   apt-get -y install fortune cowsay lolcat
+>  ---> Running in 4543b6bb99f1
+>
+> [..]
+>
+> Removing intermediate container 4543b6bb99f1
+>  ---> 7958a569068f
+> Step 4/7 : ENV PATH=/usr/games:$PATH
+>  ---> Running in 86282799c41f
+> Removing intermediate container 86282799c41f
+>  ---> 3ffdfe179e34
+> Step 5/7 : VOLUME /data
+>  ---> Running in f93de5446caa
+> Removing intermediate container f93de5446caa
+>  ---> 9c174e36bf3a
+> Step 6/7 : WORKDIR /data
+>  ---> Running in eed67d591239
+> Removing intermediate container eed67d591239
+>  ---> 36cc09b2c59b
+> Step 7/7 : CMD fortune | cowsay | lolcat
+>  ---> Running in 87a464d2ee67
+> Removing intermediate container 87a464d2ee67
+>  ---> 3c62a0f2e06e
+> Successfully built 3c62a0f2e06e
+> Successfully tagged lolcow:1Nov19
+> ```
+> {: .output}
+{: .output-extra}
 
 
 ### A Dockerfile recipe
