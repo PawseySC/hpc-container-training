@@ -119,8 +119,8 @@ $codeblock-padding: 5px !default;
       border-color: $color;
       margin-top: 0px;
       margin-left: -$codeblock-padding; // to move back to the left margin of the enclosing blockquote
-    }
-    h4:before {
+  }
+  h4:before {
       font-family: 'Glyphicons Halflings';
       content: $glyph;
       float: left;
@@ -128,8 +128,14 @@ $codeblock-padding: 5px !default;
       padding-right: $codeblock-padding;
       display: inline-block;
       -webkit-font-smoothing: antialiased;
-    }
-
+  }
+  h3 {
+        padding-top: $codeblock-padding;
+        padding-bottom: $codeblock-padding;
+        font-size: 18px;
+        margin-top: 0px;
+        margin-left: $codeblock-padding; // to move back to the left margin of the enclosing blockquote
+  }
 }
 
 .callout{ @include bkSetup($color-callout, "\e146"); }
