@@ -1,23 +1,38 @@
 # Make sure to add comments all the time
+ARG UBUNTU_VER=21.04
 # Use ubuntu 21.04, perhaps doesn't work with later versions
-FROM ubuntu:21.04
+FROM ubuntu:${UBUNTU_VER}
+# all build arguments before a FROM are wiped clean
+# so make sure to redeclare them again
+ARG UBUNTU_VER=21.04
 
-# Set the arguments 
+# Set the arguments
+ARG CONTAINER_VER=1.0.0
 ARG MPICH_VERSION="3.4rc1"
+# note that the MPI version supported by mpich for all recent ones is 3
+ARG MPI_VERSION=3
 ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
 ARG MPICH_MAKE_OPTIONS="-j4"
 ARG OSU_BENCH_VERSION="5.9"
 ARG OSU_BENCH_CONFIGURE_OPTIONS="--prefix=/usr/local CC=mpicc CXX=mpicxx CFLAGS=-O3"
 ARG OSU_BENCH_MAKE_OPTIONS="-j4"
+ARG CONTAINER_SCRIPT="container-info.sh"
 
-# Add several labels, might want to change them 
+# Add several labels, might want to change them
 LABEL maintainer="ASKAP"
-LABEL version="1.x.x"
+LABEL version=${CONTAINER_VER}
 LABEL description="Container for MPI library using MPICH ABI"
-LABEL tags="ubuntu/21.04, mpich/${MPICH_VERSION}, osu/${OSU_BENCH_VERSION}"
+LABEL tags="ubuntu/${UBUNTU_VER}, mpich/${MPICH_VERSION}, osu/${OSU_BENCH_VERSION}"
 LABEL mpi.abi="mpich"
-LABEL mpi.version="${MPICH_VERSION}"
+LABEL mpi.version=${MPI_VERSION} # store the MPI VERSION not the library version
+LABEL mpi.library.version="${MPICH_VERSION}"
 LABEL osu.version="${OSU_BENCH_VERSION}"
+
+# now add several environment variables that could be useful
+ENV MPI_ABI="mpich"
+ENV MPI_VERSION=${MPI_VERSION}
+ENV MPI_LIBRARY_VERSION=${MPICH_VERSION}
+ENV CONTAINER_DESCRIPTION="Container for MPI library using MPICH ABI"
 
 # Install package dependencies
 # note here the inclusion of apt-get clean all and rm -rf
@@ -31,9 +46,8 @@ RUN apt-get update -qq \
       && apt-get clean all \
       && rm -r /var/lib/apt/lists/*
 
-
-# First build mpich 
-RUN mkdir -p /tmp/mpich-build && cd /tmp/mpich-build \   
+# First build mpich
+RUN mkdir -p /tmp/mpich-build && cd /tmp/mpich-build \
       && wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
       && tar xvzf mpich-${MPICH_VERSION}.tar.gz \
       && cd mpich-${MPICH_VERSION}  \
@@ -51,10 +65,19 @@ RUN mkdir -p /tmp/mpich-build && cd /tmp/mpich-build \
       && make ${OSU_BENCH_MAKE_OPTIONS} \
       && make install
       && ldconfig \
-      && cd /tmp && rm -rf /tmp/osu-benchmark-build 
+      && cd /tmp && rm -rf /tmp/osu-benchmark-build
+
+# then copy the application dependency check and info script
+# and have that run as a default command
+# note that since this script would be specific to this
+# build, one might want to ensure that this script is simply
+# called by the general container script
+ADD ${CONTAINER_SCRIPT} /usr/bin/container-info.mpich.sh
+RUN echo "#!/bin/bash" >> /usr/bin/container-info.sh \
+    && chmod +x /usr/bin/container-info.mpich.sh \
+    && /usr/bin/container-info.mpich.sh >> /usr/bin/container-info.sh \
+    && chmod +x /usr/bin/container-info.sh
 
 WORKDIR /
 
-CMD ["/bin/bash"]
-
-# try changing command by adding in a ldd check
+CMD ["/usr/bin/container-info.sh"]
