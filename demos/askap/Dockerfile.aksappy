@@ -1,0 +1,55 @@
+# this a python environment
+
+# set a build time arg for python version
+ARG PYVER=3.9
+
+# add python basics using slim (ie, pip, etc)
+FROM python:${PYVER}-slim
+
+# because FRON consumes all args, set them again
+ARG PYVER=3.9
+
+# also for python set build time args
+# for files that set the reqs.in and total
+# reqs and save to image
+ARG REQFILE_IN=requirements.in
+ARG REQFILE=requirements.txt
+ADD ${REQFILE_IN} /requirements.in
+ADD ${REQFILE} /requirements.txt
+
+# add the build time args of askap python versions
+ARG PY_ASKAP_VER=master
+
+# note for above make sure to use
+# consistent python versions used to generate
+# the REQFILE
+
+# and some useful metadata
+# for tips on label key formats see https://docs.docker.com/config/labels-custom-metadata/
+LABEL maintainer.user="Pascal Jahan Elahi"
+LABEL maintainer.email="pascal.elahi@pawsey.org.au"
+LABEL description="The image provides the askap python stack, askappy"
+LABEL python.version=${PYVER}
+LABEL python.aksappy.version=${PY_AKSAP_VER}
+
+# define any environment variables
+ENV ASKAPPY_VERSION=${PY_ASKAP_VER}
+
+# run the pip install with the requirement file
+RUN pip install --no-cache-dir install --no-deps -r requirements.txt  \
+    # once install the desired packages, run apt-get for any other useful packages \
+    && apt-get -y install git cmake \
+    && apt-get clean cache \
+    && rm -rf /var/lib/apt/lists/*
+
+# doing git clone and install of local python packages
+RUN mkdir /tmp/python-askap \
+    # for git clone it might be necessary to get ssh keys
+    && git clone https://bitbucket.csiro.au/scm/tos/python-askap.git /tmp/python-askap \
+    && cd /tmp/python-askap \
+    && git checkout ${PY_ASKAP_VER} \
+    # install this python package and clean up \
+    && cd && pip install /tmp/python-askap && rm -rf /tmp/python-askap \
+    # move to next python package
+    # then clean up anything else
+    && echo "Done"
