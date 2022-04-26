@@ -11,12 +11,12 @@ ARG CONTAINER_VER=1.0.0
 ARG MPICH_VERSION="3.4rc1"
 # note that the MPI version supported by mpich for all recent ones is 3
 ARG MPI_VERSION=3
-ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr"
+ARG MPICH_CONFIGURE_OPTIONS="--enable-fast=all,O3 --prefix=/usr --with-device=ch3"
 ARG MPICH_MAKE_OPTIONS="-j4"
 ARG OSU_BENCH_VERSION="5.9"
 ARG OSU_BENCH_CONFIGURE_OPTIONS="--prefix=/usr/local CC=mpicc CXX=mpicxx CFLAGS=-O3"
 ARG OSU_BENCH_MAKE_OPTIONS="-j4"
-ARG CONTAINER_SCRIPT="container-info.sh"
+ARG CONTAINER_SCRIPT="container-info.mpich.sh"
 
 # Add several labels, might want to change them
 LABEL maintainer="ASKAP"
@@ -24,7 +24,8 @@ LABEL version=${CONTAINER_VER}
 LABEL description="Container for MPI library using MPICH ABI"
 LABEL tags="ubuntu/${UBUNTU_VER}, mpich/${MPICH_VERSION}, osu/${OSU_BENCH_VERSION}"
 LABEL mpi.abi="mpich"
-LABEL mpi.version=${MPI_VERSION} # store the MPI VERSION not the library version
+LABEL mpi.version=${MPI_VERSION} 
+# store the MPI VERSION not the library version
 LABEL mpi.library.version="${MPICH_VERSION}"
 LABEL osu.version="${OSU_BENCH_VERSION}"
 
@@ -33,6 +34,9 @@ ENV MPI_ABI="mpich"
 ENV MPI_VERSION=${MPI_VERSION}
 ENV MPI_LIBRARY_VERSION=${MPICH_VERSION}
 ENV CONTAINER_DESCRIPTION="Container for MPI library using MPICH ABI"
+# some useful debian and os related environment variables 
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV LANG="C.UTF-8" LC_ALL="C.UTF-8"
 
 # Install package dependencies
 # note here the inclusion of apt-get clean all and rm -rf
@@ -48,22 +52,22 @@ RUN apt-get update -qq \
 
 # First build mpich
 RUN mkdir -p /tmp/mpich-build && cd /tmp/mpich-build \
-      && wget http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
+      && wget --no-check-certificate https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
       && tar xvzf mpich-${MPICH_VERSION}.tar.gz \
       && cd mpich-${MPICH_VERSION}  \
-      && ./configure ${MPICH_CONFIGURE_OPTIONS} \
+      && ./configure ${MPICH_CONFIGURE_OPTIONS} FFLAGS=-fallow-argument-mismatch \
       && make ${MPICH_MAKE_OPTIONS} \
       && make install \
       && ldconfig \
       && cd /tmp && rm -rf /tmp/mpich-build \
       # build osu benchmarks \
-      && cd /tmp/osu-benchmark-build
-      && wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
+      && mkdir -p /tmp/osu-benchmark-build && cd /tmp/osu-benchmark-build \
+      && wget --no-check-certificate https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
       && tar xzvf osu-micro-benchmarks-${OSU_BENCH_VERSION}.tar.gz \
       && cd osu-micro-benchmarks-${OSU_BENCH_VERSION} \
       && ./configure ${OSU_BENCH_CONFIGURE_OPTIONS} \
       && make ${OSU_BENCH_MAKE_OPTIONS} \
-      && make install
+      && make install \
       && ldconfig \
       && cd /tmp && rm -rf /tmp/osu-benchmark-build
 
